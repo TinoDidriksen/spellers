@@ -1,4 +1,8 @@
 <?xml version='1.0' encoding='UTF-8'?>
+<!--
+  Copyright (C) 2015, Tino Didriksen <mail@tinodidriksen.com>
+  Licensed under the GNU GPL version 3 or later; see http://www.gnu.org/licenses/
+-->
 <Wix xmlns='http://schemas.microsoft.com/wix/2006/wi'>
   <Product Name='{NAME}' Id='*' UpgradeCode='{UUID0}' Language='1033' Codepage='1252' Version='{VERSION_DOT}' Manufacturer='Tino Didriksen Consult'>
 
