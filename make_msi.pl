@@ -5,6 +5,7 @@
 use strict;
 use warnings;
 use utf8;
+use File::Basename;
 BEGIN {
 	$| = 1;
 	binmode(STDIN, ':encoding(UTF-8)');
@@ -56,6 +57,7 @@ close FILE;
 my $dir = 'build/'.$conf{NAME};
 `rm -rf '$dir'`;
 `mkdir -p '$dir'`;
+`cp -a '$ini' '$dir/speller.ini'`;
 
 my $icon = '';
 if (-s 'impls/'.$ARGV[0].'.ico') {
@@ -75,7 +77,16 @@ for (my $i=0 ; $i<9 ; $i++) {
    $wxs =~ s/{UUID$i}/$conf{UUID}/g;
 }
 
-# <File Id='FomaEXE' Name='flookup.exe' DiskId='1' Source='backend/hfst-ospell.exe' KeyPath='yes' />
+my $backend = '';
+foreach my $f (glob("$dir/backend/*")) {
+   $f =~ s@^$dir/@@;
+   my $base = basename($f);
+   my $id = $base;
+   $id =~ s/[^a-z0-9]+/_/g;
+   $backend .= "            <File Id='$id' Name='$base' DiskId='1' Source='$f' />\n";
+}
+$backend =~ s@ />@ KeyPath='yes' />@;
+$wxs =~ s/{BACKEND_FILES}\n?/$backend/g;
 
 open FILE, ">$dir/$conf{NAME}.wxs" or die "Could not open output wxs: $!\n";
 print FILE $wxs;

@@ -14,8 +14,10 @@
         Maximum='{VERSION_DOT}' IncludeMaximum='no' />
     </Upgrade>
 
+    <!-- msitools doesn't support these, but leaving here for WiX
     <CustomAction Id='AlreadyUpdated' Error='[ProductName] is already the latest version.' />
     <CustomAction Id='NoDowngrade' Error='A newer version of [ProductName] is already installed.' />
+    -->
 
     <InstallExecuteSequence>
       <RemoveExistingProducts After='InstallInitialize' />
@@ -30,9 +32,9 @@
         <Directory Id='INSTALLDIR' Name='{NAME}'>
 
           <Component Id='SpellChecker' Guid='{UUID1}'>
-            <File Id='SpellerDLL32' Name='office32.dll' DiskId='1' Source='office32.dll' KeyPath='yes' />
-            <File Id='SpellerDLL64' Name='office64.dll' DiskId='1' Source='office64.dll' />
-            <File Id='SpellerPropagate' Name='create-hkcu.exe' DiskId='1' Source='create-hkcu.exe' />
+            <File Id='SpellerDLL32' Name='office32.dll' DiskId='1' Source='../../msoffice/win/office32.dll' KeyPath='yes' />
+            <File Id='SpellerDLL64' Name='office64.dll' DiskId='1' Source='../../msoffice/win/office64.dll' />
+            <File Id='SpellerPropagate' Name='create-hkcu.exe' DiskId='1' Source='../../msoffice/win/create-hkcu.exe' />
             <File Id='SpellerIni' Name='speller.ini' DiskId='1' Source='speller.ini' />
 
             <RegistryKey Id='SpellerRegGlobal' Root='HKLM' Key='Software\Microsoft\Active Setup\Installed Components\{{UUID0}}' ForceDeleteOnUninstall='yes'>
