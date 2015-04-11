@@ -1,0 +1,67 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<Wix xmlns='http://schemas.microsoft.com/wix/2006/wi'>
+  <Product Name='{NAME}' Id='*' UpgradeCode='{UUID0}' Language='1033' Codepage='1252' Version='{VERSION_DOT}' Manufacturer='Tino Didriksen Consult'>
+
+    <Package Id='*' Keywords='Installer' Description='{NAME} Installation' Comments='{NAME} is a {LOCALE} spell checker for Microsoft Office 2007+, plus Microsoft Windows 8+. Developed by Tino Didriksen (http://tinodidriksen.com/) with engine based on HFST (http://sf.net/p/hfst/).' Manufacturer='Tino Didriksen Consult' InstallerVersion='100' Languages='1033' Compressed='yes' SummaryCodepage='1252' InstallScope='perMachine' />
+
+    <Upgrade Id='{UUID0}'>
+      <UpgradeVersion OnlyDetect='no' Property='PREVIOUSFOUND'
+        Minimum='0.0.1' IncludeMinimum='yes'
+        Maximum='{VERSION_DOT}' IncludeMaximum='no' />
+    </Upgrade>
+
+    <CustomAction Id='AlreadyUpdated' Error='[ProductName] is already the latest version.' />
+    <CustomAction Id='NoDowngrade' Error='A newer version of [ProductName] is already installed.' />
+
+    <InstallExecuteSequence>
+      <RemoveExistingProducts After='InstallInitialize' />
+    </InstallExecuteSequence>
+
+    <Media Id='1' Cabinet='{NAME}.cab' EmbedCab='yes' DiskPrompt='Disk #1' />
+    <Property Id='DiskPrompt' Value='{NAME} Installation [1]' />
+{ICON}
+
+    <Directory Id='TARGETDIR' Name='SourceDir'>
+      <Directory Id='ProgramFilesFolder' Name='PFiles'>
+        <Directory Id='INSTALLDIR' Name='{NAME}'>
+
+          <Component Id='SpellChecker' Guid='{UUID1}'>
+            <File Id='SpellerDLL32' Name='office32.dll' DiskId='1' Source='office32.dll' KeyPath='yes' />
+            <File Id='SpellerDLL64' Name='office64.dll' DiskId='1' Source='office64.dll' />
+            <File Id='SpellerPropagate' Name='create-hkcu.exe' DiskId='1' Source='create-hkcu.exe' />
+            <File Id='SpellerIni' Name='speller.ini' DiskId='1' Source='speller.ini' />
+
+            <RegistryKey Id='SpellerRegGlobal' Root='HKLM' Key='Software\Microsoft\Active Setup\Installed Components\{{UUID0}}' ForceDeleteOnUninstall='yes'>
+              <RegistryValue Type='string' Value='{NAME}' />
+              <RegistryValue Type='string' Name='Version' Value='{VERSION_COMMA}' />
+              <RegistryValue Type='string' Name='StubPath' Value='[INSTALLDIR]create-hkcu.exe' />
+            </RegistryKey>
+          </Component>
+
+          <Directory Id='BACKENDDIR' Name='backend'>
+            <Component Id='Backend' Guid='{UUID2}'>
+{BACKEND_FILES}
+            </Component>
+          </Directory>
+
+          <Component Id='SpellerReg' Guid='{UUID3}'>
+            <RegistryKey Id='SpellerRegLocal' Root='HKCU' Key='Software\Microsoft\Shared Tools\Proofing Tools\1.0\Override\{LOCALE}' ForceDeleteOnUninstall='yes'>
+              <RegistryValue Type='string' Name='DLL' Value='[INSTALLDIR]office32.dll' />
+              <RegistryValue Type='string' Name='LEX' Value='[INSTALLDIR]speller.ini' />
+              <RegistryValue Type='string' Name='DLL64' Value='[INSTALLDIR]office64.dll' />
+              <RegistryValue Type='string' Name='LEX64' Value='[INSTALLDIR]speller.ini' />
+            </RegistryKey>
+          </Component>
+
+        </Directory>
+      </Directory>
+    </Directory>
+
+    <Feature Id='Complete' Level='1'>
+      <ComponentRef Id='SpellChecker' />
+      <ComponentRef Id='Backend' />
+      <ComponentRef Id='SpellerReg' />
+    </Feature>
+
+  </Product>
+</Wix>
