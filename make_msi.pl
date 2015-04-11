@@ -90,7 +90,7 @@ foreach my $f (glob("$dir/backend/*")) {
    my $base = basename($f);
    my $id = $base;
    $id =~ s/[^a-z0-9]+/_/g;
-   $backend .= "            <File Id='Backend_$id' Name='$base' DiskId='1' Source='$f' />\n";
+   $backend .= "              <File Id='Backend_$id' Name='$base' DiskId='1' Source='$f' />\n";
 }
 $backend =~ s@ />@ KeyPath='yes' />@;
 $wxs =~ s/{BACKEND_FILES}\n?/$backend/g;
