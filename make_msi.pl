@@ -53,8 +53,13 @@ close FILE;
    close FILE;
 }
 
+my $dir = 'build/'.$conf{NAME};
+`rm -rf '$dir'`;
+`mkdir -p '$dir'`;
+
 my $icon = '';
 if (-s 'impls/'.$ARGV[0].'.ico') {
+   `cp -a 'impls/$ARGV[0].ico' '$dir/'`;
    $icon .= "    <Icon Id='{NAME}.ico' SourceFile='{NAME}.ico'/>\n";
    $icon .= "    <Property Id='ARPPRODUCTICON' Value='{NAME}.ico'/>\n";
 }
@@ -72,4 +77,6 @@ for (my $i=0 ; $i<9 ; $i++) {
 
 # <File Id='FomaEXE' Name='flookup.exe' DiskId='1' Source='backend/hfst-ospell.exe' KeyPath='yes' />
 
-print $wxs;
+open FILE, ">$dir/$conf{NAME}.wxs" or die "Could not open output wxs: $!\n";
+print FILE $wxs;
+close FILE;
