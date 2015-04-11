@@ -35,6 +35,8 @@
             <File Id='SpellerDLL32' Name='office32.dll' DiskId='1' Source='../../msoffice/win/office32.dll' KeyPath='yes' />
             <File Id='SpellerDLL64' Name='office64.dll' DiskId='1' Source='../../msoffice/win/office64.dll' />
             <File Id='SpellerPropagate' Name='create-hkcu.exe' DiskId='1' Source='../../msoffice/win/create-hkcu.exe' />
+            <File Id='Speller_libstdcpp' Name='libstdc++-6.dll' DiskId='1' Source='/opt/mxe/usr/i686-w64-mingw32.shared/bin/libstdc++-6.dll' />
+            <File Id='Speller_libgcc_s' Name='libgcc_s_sjlj-1.dll' DiskId='1' Source='/opt/mxe/usr/i686-w64-mingw32.shared/bin/libgcc_s_sjlj-1.dll' />
             <File Id='SpellerIni' Name='speller.ini' DiskId='1' Source='speller.ini' />
 
             <RegistryKey Id='SpellerRegGlobal' Root='HKLM' Key='Software\Microsoft\Active Setup\Installed Components\{{UUID0}}' ForceDeleteOnUninstall='yes'>

@@ -55,13 +55,13 @@ close FILE;
 }
 
 my $dir = 'build/'.$conf{NAME};
-`rm -rf '$dir'`;
-`mkdir -p '$dir'`;
-`cp -a '$ini' '$dir/speller.ini'`;
+print `rm -rfv '$dir'`;
+print `mkdir -pv '$dir'`;
+print `cp -av '$ini' '$dir/speller.ini'`;
 
 my $icon = '';
 if (-s 'impls/'.$ARGV[0].'.ico') {
-   `cp -a 'impls/$ARGV[0].ico' '$dir/'`;
+   print `cp -av 'impls/$ARGV[0].ico' '$dir/'`;
    $icon .= "    <Icon Id='{NAME}.ico' SourceFile='{NAME}.ico'/>\n";
    $icon .= "    <Property Id='ARPPRODUCTICON' Value='{NAME}.ico'/>\n";
 }
@@ -77,13 +77,20 @@ for (my $i=0 ; $i<9 ; $i++) {
    $wxs =~ s/{UUID$i}/$conf{UUID}/g;
 }
 
+if (-s 'impls/'.$ARGV[0].'.sh') {
+   my $tmp = "/tmp/speller-$$";
+   print `./impls/$ARGV[0].sh '$tmp'`;
+   print `mv -v '$tmp/backend' '$dir/'`;
+   print `rm -rfv '$tmp'`;
+}
+
 my $backend = '';
 foreach my $f (glob("$dir/backend/*")) {
    $f =~ s@^$dir/@@;
    my $base = basename($f);
    my $id = $base;
    $id =~ s/[^a-z0-9]+/_/g;
-   $backend .= "            <File Id='$id' Name='$base' DiskId='1' Source='$f' />\n";
+   $backend .= "            <File Id='Backend_$id' Name='$base' DiskId='1' Source='$f' />\n";
 }
 $backend =~ s@ />@ KeyPath='yes' />@;
 $wxs =~ s/{BACKEND_FILES}\n?/$backend/g;
@@ -91,3 +98,6 @@ $wxs =~ s/{BACKEND_FILES}\n?/$backend/g;
 open FILE, ">$dir/$conf{NAME}.wxs" or die "Could not open output wxs: $!\n";
 print FILE $wxs;
 close FILE;
+
+chdir $dir;
+print `wixl -v '$conf{NAME}.wxs'`;
