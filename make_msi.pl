@@ -54,7 +54,7 @@ close FILE;
    close FILE;
 }
 
-my $dir = 'build/'.$conf{NAME};
+my $dir = 'build/'.$ARGV[0];
 print `rm -rfv '$dir'`;
 print `mkdir -pv '$dir'`;
 print `cp -av '$ini' '$dir/speller.ini'`;
@@ -95,9 +95,9 @@ foreach my $f (glob("$dir/backend/*")) {
 $backend =~ s@ />@ KeyPath='yes' />@;
 $wxs =~ s/{BACKEND_FILES}\n?/$backend/g;
 
-open FILE, ">$dir/$conf{NAME}.wxs" or die "Could not open output wxs: $!\n";
+open FILE, ">$dir/$ARGV[0].wxs" or die "Could not open output wxs: $!\n";
 print FILE $wxs;
 close FILE;
 
 chdir $dir;
-print `wixl -v '$conf{NAME}.wxs'`;
+print `wixl -v '$ARGV[0].wxs'`;
