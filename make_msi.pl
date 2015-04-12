@@ -99,5 +99,8 @@ open FILE, ">$dir/$ARGV[0].wxs" or die "Could not open output wxs: $!\n";
 print FILE $wxs;
 close FILE;
 
+print `cp -av '/opt/mxe/usr/i686-w64-mingw32.shared/bin/libstdc++-6.dll' '/opt/mxe/usr/i686-w64-mingw32.shared/bin/libgcc_s_sjlj-1.dll' '$dir/'`;
+
 chdir $dir;
+print `find . -type f -name '*.exe' -or -name '*.dll' | xargs -rn1 /opt/mxe/usr/bin/i686-w64-mingw32.shared-strip`;
 print `wixl -v '$ARGV[0].wxs'`;

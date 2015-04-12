@@ -4,9 +4,9 @@
   Licensed under the GNU GPL version 3 or later; see http://www.gnu.org/licenses/
 -->
 <Wix xmlns='http://schemas.microsoft.com/wix/2006/wi'>
-  <Product Name='{NAME}' Id='*' UpgradeCode='{UUID0}' Language='1033' Codepage='1252' Version='{VERSION_DOT}' Manufacturer='Tino Didriksen Consult'>
+  <Product Name='{NAME}' Id='*' UpgradeCode='{UUID0}' Codepage='1252' Version='{VERSION_DOT}' Manufacturer='Tino Didriksen Consult'>
 
-    <Package Id='*' Keywords='Installer' Description='{NAME} Installation' Comments='{NAME} is a {LOCALE} spell checker for Microsoft Office 2007+, plus Microsoft Windows 8+. Developed by Tino Didriksen (http://tinodidriksen.com/) with engine based on HFST (http://sf.net/p/hfst/).' Manufacturer='Tino Didriksen Consult' InstallerVersion='100' Languages='1033' Compressed='yes' SummaryCodepage='1252' InstallScope='perMachine' />
+    <Package Id='*' Keywords='Installer' Description='{NAME} Installation' Comments='{NAME} is a {LOCALE} spell checker for Microsoft Office 2007+, plus Microsoft Windows 8+. Developed by Tino Didriksen (http://tinodidriksen.com/) with engine based on HFST (http://sf.net/p/hfst/).' Manufacturer='Tino Didriksen Consult' InstallerVersion='100' Compressed='yes' SummaryCodepage='1252' InstallScope='perMachine' />
 
     <Upgrade Id='{UUID0}'>
       <UpgradeVersion OnlyDetect='no' Property='PREVIOUSFOUND'
@@ -35,8 +35,8 @@
             <File Id='SpellerDLL32' Name='office32.dll' DiskId='1' Source='../../msoffice/win/office32.dll' KeyPath='yes' />
             <File Id='SpellerDLL64' Name='office64.dll' DiskId='1' Source='../../msoffice/win/office64.dll' />
             <File Id='SpellerPropagate' Name='create-hkcu.exe' DiskId='1' Source='../../msoffice/win/create-hkcu.exe' />
-            <File Id='Speller_libstdcpp' Name='libstdc++-6.dll' DiskId='1' Source='/opt/mxe/usr/i686-w64-mingw32.shared/bin/libstdc++-6.dll' />
-            <File Id='Speller_libgcc_s' Name='libgcc_s_sjlj-1.dll' DiskId='1' Source='/opt/mxe/usr/i686-w64-mingw32.shared/bin/libgcc_s_sjlj-1.dll' />
+            <File Id='Speller_libstdcpp' Name='libstdc++-6.dll' DiskId='1' Source='libstdc++-6.dll' />
+            <File Id='Speller_libgcc_s' Name='libgcc_s_sjlj-1.dll' DiskId='1' Source='libgcc_s_sjlj-1.dll' />
             <File Id='SpellerIni' Name='speller.ini' DiskId='1' Source='speller.ini' />
 
             <RegistryKey Id='SpellerRegGlobal' Root='HKLM' Key='Software\Microsoft\Active Setup\Installed Components\{{UUID0}}' ForceDeleteOnUninstall='yes'>
