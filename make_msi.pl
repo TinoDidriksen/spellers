@@ -68,7 +68,7 @@ if (-s 'impls/'.$ARGV[0].'.ico') {
 $wxs =~ s/{ICON}\n?/$icon/g;
 
 $wxs =~ s/{NAME}/$conf{NAME}/g;
-$wxs =~ s/{LOCALE}/$conf{LOCALE}/g;
+$wxs =~ s/{LOCALES}/$conf{LOCALES}/g;
 $wxs =~ s/{VERSION_DOT}/$ver_dot/g;
 $wxs =~ s/{VERSION_COMMA}/$ver_comma/g;
 
@@ -89,11 +89,24 @@ foreach my $f (glob("$dir/backend/*")) {
    $f =~ s@^$dir/@@;
    my $base = basename($f);
    my $id = $base;
-   $id =~ s/[^a-z0-9]+/_/g;
+   $id =~ s/[^A-Za-z0-9]+/_/g;
    $backend .= "              <File Id='Backend_$id' Name='$base' DiskId='1' Source='$f' />\n";
 }
 $backend =~ s@ />@ KeyPath='yes' />@;
 $wxs =~ s/{BACKEND_FILES}\n?/$backend/g;
+
+my $lregs = '';
+foreach my $locale (split / /, $conf{LOCALES}) {
+   my $id = $locale;
+   $id =~ s/[^A-Za-z0-9]+/_/g;
+   $lregs .= "            <RegistryKey Id='SpellerRegLocal-$id' Root='HKCU' Key='Software\\Microsoft\\Shared Tools\\Proofing Tools\\1.0\\Override\\$locale' ForceDeleteOnUninstall='yes'>\n";
+   $lregs .= "              <RegistryValue Type='string' Name='DLL' Value='[INSTALLDIR]office32.dll' />\n";
+   $lregs .= "              <RegistryValue Type='string' Name='LEX' Value='[INSTALLDIR]speller.ini' />\n";
+   $lregs .= "              <RegistryValue Type='string' Name='DLL64' Value='[INSTALLDIR]office64.dll' />\n";
+   $lregs .= "              <RegistryValue Type='string' Name='LEX64' Value='[INSTALLDIR]speller.ini' />\n";
+   $lregs .= "            </RegistryKey>\n";
+}
+$wxs =~ s/{LOCALE_REGS}\n?/$lregs/g;
 
 open FILE, ">$dir/$ARGV[0].wxs" or die "Could not open output wxs: $!\n";
 print FILE $wxs;

@@ -6,7 +6,7 @@
 <Wix xmlns='http://schemas.microsoft.com/wix/2006/wi'>
   <Product Name='{NAME}' Id='*' UpgradeCode='{UUID0}' Codepage='1252' Version='{VERSION_DOT}' Manufacturer='Tino Didriksen Consult'>
 
-    <Package Id='*' Keywords='Installer' Description='{NAME} Installation' Comments='{NAME} is a {LOCALE} spell checker for Microsoft Office 2007+, plus Microsoft Windows 8+. Developed by Tino Didriksen (http://tinodidriksen.com/) with engine based on HFST (http://sf.net/p/hfst/).' Manufacturer='Tino Didriksen Consult' InstallerVersion='100' Compressed='yes' SummaryCodepage='1252' InstallScope='perMachine' />
+    <Package Id='*' Keywords='Installer' Description='{NAME} Installation' Comments='{NAME} is a {LOCALES} spell checker for Microsoft Office 2007+, plus Microsoft Windows 8+. Developed by Tino Didriksen (http://tinodidriksen.com/) with engine based on HFST (http://sf.net/p/hfst/).' Manufacturer='Tino Didriksen Consult' InstallerVersion='100' Compressed='yes' SummaryCodepage='1252' InstallScope='perMachine' />
 
     <Upgrade Id='{UUID0}'>
       <UpgradeVersion OnlyDetect='no' Property='PREVIOUSFOUND'
@@ -53,12 +53,7 @@
           </Directory>
 
           <Component Id='SpellerReg' Guid='{UUID3}'>
-            <RegistryKey Id='SpellerRegLocal' Root='HKCU' Key='Software\Microsoft\Shared Tools\Proofing Tools\1.0\Override\{LOCALE}' ForceDeleteOnUninstall='yes'>
-              <RegistryValue Type='string' Name='DLL' Value='[INSTALLDIR]office32.dll' />
-              <RegistryValue Type='string' Name='LEX' Value='[INSTALLDIR]speller.ini' />
-              <RegistryValue Type='string' Name='DLL64' Value='[INSTALLDIR]office64.dll' />
-              <RegistryValue Type='string' Name='LEX64' Value='[INSTALLDIR]speller.ini' />
-            </RegistryKey>
+{LOCALE_REGS}
           </Component>
 
         </Directory>
