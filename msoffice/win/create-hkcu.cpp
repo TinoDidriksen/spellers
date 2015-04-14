@@ -3,6 +3,7 @@
 #include <string>
 #include <cctype>
 #include <map>
+#include <sstream>
 #include <stdint.h>
 #include <windows.h>
 
@@ -53,35 +54,39 @@ int main() {
 		conf[key] = value;
 	}
 
-	if (conf.empty() || !conf.count("LOCALE")) {
+	if (conf.empty() || !conf.count("LOCALES")) {
 		return -1;
 	}
 
-	std::string buf8("Software\\Microsoft\\Shared Tools\\Proofing Tools\\1.0\\Override\\");
-	buf8.append(conf["LOCALE"]);
+	std::istringstream ss(conf["LOCALES"]);
+	std::string locale;
+	while (std::getline(ss, locale, ' ')) {
+		std::string buf8("Software\\Microsoft\\Shared Tools\\Proofing Tools\\1.0\\Override\\");
+		buf8.append(locale);
 
-	HKEY key;
-	LONG rv = 0;
+		HKEY key;
+		LONG rv = 0;
 
-	if ((rv = RegCreateKeyExA(HKEY_CURRENT_USER, buf8.c_str(), 0, 0, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, 0, &key, 0)) != ERROR_SUCCESS) {
-		std::cerr << "Error: Could not create " << buf8 << ": " << rv << std::endl;
-		return -rv;
-	}
+		if ((rv = RegCreateKeyExA(HKEY_CURRENT_USER, buf8.c_str(), 0, 0, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, 0, &key, 0)) != ERROR_SUCCESS) {
+			std::cerr << "Error: Could not create " << buf8 << ": " << rv << std::endl;
+			return -rv;
+		}
 
-	std::string data;
-	if (data.assign(path + "office32.dll").empty()
-		|| (rv = RegSetValueExA(key, "DLL", 0, REG_SZ, reinterpret_cast<const BYTE*>(data.c_str()), (data.size()+1)*sizeof(data[0]))) != ERROR_SUCCESS) {
-		std::cerr << "Error: Could not write DLL: " << rv << std::endl;
-	}
-	if (data.assign(path + "office64.dll").empty()
-		|| (rv = RegSetValueExA(key, "DLL64", 0, REG_SZ, reinterpret_cast<const BYTE*>(data.c_str()), (data.size()+1)*sizeof(data[0]))) != ERROR_SUCCESS) {
-		std::cerr << "Error: Could not write DLL64: " << rv << std::endl;
-	}
-	if (data.assign(path + "speller.ini").empty()
-		|| (rv = RegSetValueExA(key, "LEX", 0, REG_SZ, reinterpret_cast<const BYTE*>(data.c_str()), (data.size()+1)*sizeof(data[0]))) != ERROR_SUCCESS
-		|| (rv = RegSetValueExA(key, "LEX64", 0, REG_SZ, reinterpret_cast<const BYTE*>(data.c_str()), (data.size()+1)*sizeof(data[0]))) != ERROR_SUCCESS) {
-		std::cerr << "Error: Could not write LEX and/or LEX64: " << rv << std::endl;
-	}
+		std::string data;
+		if (data.assign(path + "office32.dll").empty()
+			|| (rv = RegSetValueExA(key, "DLL", 0, REG_SZ, reinterpret_cast<const BYTE*>(data.c_str()), (data.size() + 1)*sizeof(data[0]))) != ERROR_SUCCESS) {
+			std::cerr << "Error: Could not write DLL: " << rv << std::endl;
+		}
+		if (data.assign(path + "office64.dll").empty()
+			|| (rv = RegSetValueExA(key, "DLL64", 0, REG_SZ, reinterpret_cast<const BYTE*>(data.c_str()), (data.size() + 1)*sizeof(data[0]))) != ERROR_SUCCESS) {
+			std::cerr << "Error: Could not write DLL64: " << rv << std::endl;
+		}
+		if (data.assign(path + "speller.ini").empty()
+			|| (rv = RegSetValueExA(key, "LEX", 0, REG_SZ, reinterpret_cast<const BYTE*>(data.c_str()), (data.size() + 1)*sizeof(data[0]))) != ERROR_SUCCESS
+			|| (rv = RegSetValueExA(key, "LEX64", 0, REG_SZ, reinterpret_cast<const BYTE*>(data.c_str()), (data.size() + 1)*sizeof(data[0]))) != ERROR_SUCCESS) {
+			std::cerr << "Error: Could not write LEX and/or LEX64: " << rv << std::endl;
+		}
 
-	RegCloseKey(key);
+		RegCloseKey(key);
+	}
 }
