@@ -30,6 +30,7 @@ endif()
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include")
 
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/msoffice")
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/mozilla/native")
 
 if(WIN32)
 	add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/win8")
