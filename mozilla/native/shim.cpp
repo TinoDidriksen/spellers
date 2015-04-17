@@ -1,16 +1,10 @@
-#include <algorithm>
-#include <utility>
 #include <vector>
 #include <set>
-#include <locale>
-#include <codecvt>
 #include <string>
 #include <cstdio>
 #include <map>
 #include <cctype>
 #include <fstream>
-#include <stdexcept>
-#include <sstream>
 #include <unordered_map>
 #include <unordered_set>
 
@@ -26,7 +20,7 @@
 	#endif
 #else
 	#include <unistd.h>
-	#define SPELLER_API extern "C"
+	#define SPELLER_API
 #endif
 
 // Unnamed namespace to hide all these globals
@@ -310,13 +304,16 @@ extern "C" void SPELLER_API shim_terminate() {
 
 extern "C" int SPELLER_API shim_is_valid_word(const char *word) {
 	debugp p("shim_is_valid_word");
-	return static_cast<int>(checkValidWord(word));
+	std::string str(word);
+	p(str);
+	return static_cast<int>(checkValidWord(str));
 }
 
 typedef const char** ccharpp_t;
 extern "C" ccharpp_t SPELLER_API shim_find_alternatives(const char *word, int suggs) {
 	debugp p("shim_find_alternatives");
 	std::string str(word);
+	p(str);
 
 	if (checkValidWord(str, suggs)) {
 		return 0;
