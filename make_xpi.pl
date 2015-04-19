@@ -83,8 +83,8 @@ $conf{'ICON'} = '';
 if (-s 'impls/'.$ARGV[0].'.png') {
    print `mkdir -pv '$dir/skin'`;
    print `cp -av 'impls/$ARGV[0].png' '$dir/skin/icon.png'`;
-   $conf{'SKIN'} = "skin global classic/1.0 skin/\n";
-   $conf{'ICON'} = "    <em:iconURL>chrome://global/skin/icon.png</em:iconURL>\n";
+   $conf{'SKIN'} = "skin speller classic/1.0 skin/\n";
+   $conf{'ICON'} = "    <em:iconURL>chrome://speller/skin/icon.png</em:iconURL>\n";
 }
 
 for (my $i=0 ; $i<9 ; $i++) {
