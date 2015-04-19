@@ -30,11 +30,6 @@ function Shim() {
 
 Shim.prototype = {
     shim: null,
-
-    data_loc: "",
-
-    call_abi: ctypes.default_abi,
-
     fn_shim_init: null,
     fn_shim_terminate: null,
     fn_shim_spell_cstr: null,
@@ -44,33 +39,29 @@ Shim.prototype = {
         var runtime = Components.classes["@mozilla.org/xre/app-info;1"]
             .getService(Components.interfaces.nsIXULRuntime);
 
-        var abi = runtime.OS + "_" + runtime.XPCOMABI;
-
         var lib_name;
-        this.data_loc = "";
-        //==================================================================
+
         // Detect shared library name to load
-        //==================================================================
-        if (abi == "Linux_x86-gcc3" || abi == "Linux_x86_64-gcc3") {
-            lib_name = "shim.so.1";
+        if (runtime.OS === "Linux") {
+            lib_name = "shim.so";
         }
-        else if (abi == "WINNT_x86-msvc" || abi == "WINNT_x86_64-msvc") {
-            lib_name = "shim-1.dll";
-            this.call_abi = ctypes.winapi_abi;
+        else if (runtime.OS === "WINNT") {
+            lib_name = "shim32.dll";
+        	if (runtime.XPCOMABI.indexOf('x86_64') != -1) {
+        		lib_name = "shim64.dll";
+        	}
         }
-        else if (abi == "Darwin_x86_64-gcc3" || abi == "Darwin_x86-gcc3" || abi == "Darwin_ppc-gcc3") {
-            lib_name = "shim.1.dylib";
+        else if (runtime.OS === "Darwin") {
+            lib_name = "shim.dylib";
         }
         else {
-            throw "Unsupported ABI " + abi;
+            throw "Unsupported OS " + runtime.OS;
         }
 
-        // Try to locate shim inside extension directory and
-        // replace value
+        // Try to locate shim inside extension directory and replace value
         var extension_dir = __LOCATION__.parent.parent;
         var shim_loc = extension_dir.clone();
-        shim_loc.append("voikko");
-        shim_loc.append(abi);
+        shim_loc.append("native");
         shim_loc.append(lib_name);
         if (shim_loc.exists() && shim_loc.isFile()) {
             this.shim = ctypes.open(shim_loc.path);
@@ -82,49 +73,29 @@ Shim.prototype = {
             aConsoleService.logStringMessage("{NAME}: shim_loc = " + shim_loc.path);
         }
 
-        var data_loc = extension_dir.clone();
-        data_loc.append("voikko");
-        var data_loc_test = data_loc.clone();
-        data_loc_test.append("2");
-        data_loc_test.append("mor-standard");
-        data_loc_test.append("voikko-fi_FI.pro");
-        if (data_loc_test.exists() && data_loc_test.isFile()) {
-            this.data_loc = data_loc.path;
-            aConsoleService.logStringMessage("{NAME}: Found suomi-malaga data at " + this.data_loc);
-        }
-
-
-        //
         // int shim_init();
-        //
         this.fn_shim_init = this.shim.declare(
             "shim_init",
-            this.call_abi,
+            ctypes.default_abi,
             ctypes.int);
 
-        //
         // void shim_terminate();
-        //
         this.fn_shim_terminate = this.shim.declare(
             "shim_terminate",
-            this.call_abi,
+            ctypes.default_abi,
             ctypes.void_t);
 
-        //
         // int shim_is_valid_word(const char * word);
-        //
         this.fn_shim_spell_cstr = this.shim.declare(
             "shim_is_valid_word",
-            this.call_abi,
+            ctypes.default_abi,
             ctypes.int,
             ctypes.char.ptr);
 
-        //
         // const char ** shim_find_alternatives(const char * word, int suggs);
-        //
         this.fn_shim_suggest_cstr = this.shim.declare(
             "shim_find_alternatives",
-            this.call_abi,
+            ctypes.default_abi,
             ctypes.char.ptr.array(MAX_SUGGS).ptr,
             ctypes.char.ptr,
             ctypes.int);
@@ -189,20 +160,24 @@ Speller.prototype = {
     contractID: CONTRACT_ID,
 
     locales: {LOCALES_JSON},
+    current_loc: null,
     shim_handle: null,
     mPersonalDictionary: null,
-    mCurrentLocale: null,
 
     QueryInterface: XPCOMUtils.generateQI([mozISpellCheckingEngine, Components.interfaces.nsISupport]),
 
     get dictionary() {
-        return "fi_FI";
+        return this.current_loc;
     },
 
     set dictionary(dict) {
-        if (dict != "fi_FI") {
-            throw "{NAME}: dictionary '" + dict + "' is not supported by this component (but may be supported by others)";
-        }
+    	this.current_loc = null;
+    	for (var i=0 ; i<this.locales.length ; ++i) {
+    		if (dict === this.locales[0]) {
+    			this.current_loc = dict;
+    			return;
+    		}
+    	}
     },
 
     get providesPersonalDictionary() {
@@ -237,8 +212,8 @@ Speller.prototype = {
     check: function(word) {
         var result = shim.fn_shim_spell_cstr(word);
 
-        if (result == 0 && this.mPersonalDictionary) {
-            return this.mPersonalDictionary.check(word, "fi_FI");
+        if (result == 0 && this.mPersonalDictionary && this.current_loc) {
+            return this.mPersonalDictionary.check(word, this.current_loc);
         }
 		return result != 0;
     },

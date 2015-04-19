@@ -14,9 +14,9 @@
 	#define chdir _chdir
 
 	#ifdef DLL_EXPORTS
-		#define SPELLER_API __declspec(dllexport) WINAPI
+		#define SPELLER_API __declspec(dllexport)
 	#else
-		#define SPELLER_API __declspec(dllimport) WINAPI
+		#define SPELLER_API __declspec(dllimport)
 	#endif
 #else
 	#include <unistd.h>
