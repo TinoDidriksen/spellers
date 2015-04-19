@@ -1,4 +1,4 @@
-component {{GUID1}} components/speller.js
-contract @tinodidriksen.com/speller;1 {{GUID1}}
+component {{UUID1}} components/speller.js
+contract @tinodidriksen.com/speller;1 {{UUID1}}
 category spell-check-engine @tinodidriksen.com/speller;1 speller
-skin global classic/1.0 skin/
+{SKIN}

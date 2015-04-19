@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <RDF xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:em="http://www.mozilla.org/2004/em-rdf#">
   <Description about="urn:mozilla:install-manifest">
-    <em:id>{{GUID0}}</em:id>
+    <em:id>{{UUID0}}</em:id>
     <em:name>{NAME}</em:name>
     <em:version>{VERSION_DOT}</em:version>
     <em:description>A {LOCALES} spell checker for Mozilla products. Developed by Tino Didriksen (http://tinodidriksen.com/) with engine based on HFST (http://sf.net/p/hfst/) and code from MozVoikko (https://github.com/voikko/mozvoikko).</em:description>
     <em:creator>Tino Didriksen &lt;mail@tinodidriksen.com&gt;</em:creator>
-    <em:iconURL>chrome://voikko/skin/icon.png</em:iconURL>
+{ICON}
 
     <em:unpack>true</em:unpack>
     <em:type>2</em:type>

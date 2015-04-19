@@ -1,13 +1,13 @@
 /* ***** BEGIN LICENSE BLOCK *****
  *
- *   This file is part of mozvoikko2.
+ *   This file is part of {NAME}.
  *
- *   mozvoikko2 is free software: you can redistribute it and/or modify
+ *   {NAME} is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 2 of the License, or
+ *   the Free Software Foundation, either version 3 of the License, or
  *   (at your option) any later version.
  *
- *   mozvoikko is distributed in the hope that it will be useful,
+ *   {NAME} is distributed in the hope that it will be useful,
  *   but WITHOUT ANY WARRANTY; without even the implied warranty of
  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *   GNU General Public License for more details.
@@ -20,7 +20,7 @@ Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
 Components.utils.import("resource://gre/modules/ctypes.jsm");
 
 const mozISpellCheckingEngine = Components.interfaces.mozISpellCheckingEngine;
-const CLASS_ID = Components.ID("{GUID1}");
+const CLASS_ID = Components.ID("{UUID1}");
 const CLASS_NAME = "Spell checker for {LOCALES}";
 const CONTRACT_ID = "@tinodidriksen.com/speller;1";
 const MAX_SUGGS = 50;
@@ -178,6 +178,7 @@ Speller.prototype = {
     			return;
     		}
     	}
+    	throw dict+" is not supported by {NAME}\n";
     },
 
     get providesPersonalDictionary() {
