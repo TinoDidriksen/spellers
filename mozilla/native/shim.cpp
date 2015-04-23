@@ -1,3 +1,7 @@
+/*
+	Copyright (C) 2015, Tino Didriksen <mail@tinodidriksen.com>
+	Licensed under the GNU GPL version 3 or later; see http://www.gnu.org/licenses/
+*/
 #include <vector>
 #include <set>
 #include <string>
@@ -23,6 +27,12 @@
 	#define SPELLER_API
 #endif
 
+#include <debugp.hpp>
+#ifndef NDEBUG
+std::ofstream debug("C:/Temp/Tino/debug-speller.txt", std::ios::binary);
+size_t debugd = 0;
+#endif
+
 // Unnamed namespace to hide all these globals
 namespace {
 HANDLE g_hChildStd_IN_Rd = 0;
@@ -35,43 +45,6 @@ std::unordered_set<std::string> valid_words;
 std::unordered_map<std::string, std::vector<std::string>> invalid_words;
 std::vector<const char*> rv_alts;
 std::string cbuffer;
-
-#ifndef NDEBUG
-std::ofstream debug("C:/Temp/Tino/debug-speller.txt", std::ios::binary);
-size_t debugd = 0;
-struct debugp {
-	std::string msg;
-
-	debugp(const std::string& msg) : msg(msg) {
-		debug << std::string(debugd, '\t') << '*' << msg << std::endl;
-		++debugd;
-	}
-
-	~debugp() {
-		--debugd;
-		debug << std::string(debugd, '\t') << '~' << msg << std::endl;
-	}
-
-	template<typename T>
-	void operator()(const T& t) {
-		debug << std::string(debugd, '\t');
-		for (size_t i=0 ; i<t.size() ; ++i) {
-			if (t[i] < 255) {
-				char c = static_cast<char>(t[i]);
-				debug.write(&c, 1);
-			}
-		}
-		debug << std::endl;
-	}
-
-	void operator()(size_t t) {
-		debug << std::string(debugd, '\t') << t << std::endl;
-	}
-};
-#else
-	#define debugp
-	#define p
-#endif
 
 inline std::string trim(std::string str) {
 	while (!str.empty() && std::isspace(str[str.size() - 1])) {
@@ -205,9 +178,9 @@ extern "C" int SPELLER_API shim_init() {
 	}
 	if (path[0] == 0) {
 		#ifdef _WIN64
-		GetModuleFileNameA(GetModuleHandleA("shim64.dl"), &path[0], MAX_PATH);
+		GetModuleFileNameA(GetModuleHandleA("shim64.dll"), &path[0], MAX_PATH);
 		#else
-		GetModuleFileNameA(GetModuleHandleA("shim32.dl"), &path[0], MAX_PATH);
+		GetModuleFileNameA(GetModuleHandleA("shim32.dll"), &path[0], MAX_PATH);
 		#endif
 	}
 	while (!path.empty() && path.back() != '/' && path.back() != '\\') {

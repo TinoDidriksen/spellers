@@ -1,3 +1,7 @@
+/*
+	Copyright (C) 2015, Tino Didriksen <mail@tinodidriksen.com>
+	Licensed under the GNU GPL version 3 or later; see http://www.gnu.org/licenses/
+*/
 #include <iostream>
 #include <fstream>
 #include <string>
