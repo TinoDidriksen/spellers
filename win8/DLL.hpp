@@ -12,12 +12,6 @@
 #include <cctype>
 #include <guiddef.h>
 
-#ifdef DLL_EXPORTS
-	#define SPELLER_API __declspec(dllexport)
-#else
-	#define SPELLER_API __declspec(dllimport)
-#endif
-
 enum {
 	GUID_SpellerFactory,
 	GUID_Speller,
@@ -29,6 +23,15 @@ extern std::vector<std::wstring> locales;
 extern GUID IID_Guids[NUM_GUIDS];
 extern size_t refs;
 extern size_t locks;
+
+inline std::string UUID_to_String(REFIID guid) {
+	std::string uuid(36, 0);
+	sprintf(&uuid[0], "%08lX-%04hX-%04hX-%02hhX%02hhX-%02hhX%02hhX%02hhX%02hhX%02hhX%02hhX",
+		guid.Data1, guid.Data2, guid.Data3,
+		guid.Data4[0], guid.Data4[1], guid.Data4[2], guid.Data4[3],
+		guid.Data4[4], guid.Data4[5], guid.Data4[6], guid.Data4[7]);
+	return uuid;
+}
 
 inline std::string trim(std::string str) {
 	while (!str.empty() && std::isspace(str[str.size() - 1])) {

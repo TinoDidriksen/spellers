@@ -39,12 +39,18 @@ ULONG STDMETHODCALLTYPE SpellerFactory::Release() {
 
 IFACEMETHODIMP SpellerFactory::get_SupportedLanguages(_COM_Outptr_ IEnumString** value) {
 	debugp p(__FUNCTION__);
+	if (value == nullptr) {
+		return E_POINTER;
+	}
 	*value = new EnumString(locales);
 	return S_OK;
 }
 
 IFACEMETHODIMP SpellerFactory::IsSupported(_In_ PCWSTR languageTag, _Out_ BOOL* value) {
 	debugp p(__FUNCTION__);
+	if (value == nullptr) {
+		return E_POINTER;
+	}
 	*value = false;
 
 	for (auto& locale : locales) {
@@ -59,6 +65,9 @@ IFACEMETHODIMP SpellerFactory::IsSupported(_In_ PCWSTR languageTag, _Out_ BOOL* 
 
 IFACEMETHODIMP SpellerFactory::CreateSpellCheckProvider(_In_ PCWSTR languageTag, _COM_Outptr_ ISpellCheckProvider** value) {
 	debugp p(__FUNCTION__);
+	if (value == nullptr) {
+		return E_POINTER;
+	}
 	BOOL isSupported = false;
 	HRESULT hr = IsSupported(languageTag, &isSupported);
 	if (SUCCEEDED(hr) && !isSupported) {

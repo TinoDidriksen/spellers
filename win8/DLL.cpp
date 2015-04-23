@@ -25,12 +25,6 @@ std::unique_ptr<SpellerFactory> factory;
 size_t refs = 0;
 size_t locks = 0;
 
-extern "C" {
-	STDAPI DllGetClassObject(REFCLSID objGuid, REFIID factoryGuid, void **factoryHandle);
-	STDAPI DllCanUnloadNow();
-	BOOL WINAPI DllMain(HINSTANCE instance, DWORD fdwReason, LPVOID lpvReserved);
-}
-
 bool read_conf() {
 	debugp p(__FUNCTION__);
 	MEMORY_BASIC_INFORMATION mbiInfo = { 0 };
@@ -70,12 +64,15 @@ bool read_conf() {
 
 	conf["PATH"] = path;
 
+	p(conf["PATH"]);
+	p(conf["UUID"]);
+
 	GUID uuid;
 	uuid.Data1 = strtoul(conf["UUID"].c_str(), 0, 16);
-	uuid.Data2 = static_cast<uint16_t>(strtoul(conf["UUID"].c_str() + 10, 0, 16));
-	uuid.Data3 = static_cast<uint16_t>(strtoul(conf["UUID"].c_str() + 15, 0, 16));
+	uuid.Data2 = static_cast<uint16_t>(strtoul(conf["UUID"].c_str() + 9, 0, 16));
+	uuid.Data3 = static_cast<uint16_t>(strtoul(conf["UUID"].c_str() + 14, 0, 16));
 
-	std::string bytes = conf["UUID"].substr(20);
+	std::string bytes = conf["UUID"].substr(19);
 	std::remove(bytes.begin(), bytes.end(), '-');
 	for (size_t i = 0; i < sizeof(uuid.Data4); ++i) {
 		char bs[] = {bytes[i*2], bytes[i*2+1], 0};
@@ -85,6 +82,7 @@ bool read_conf() {
 	for (uint8_t i = 0; i < NUM_GUIDS; ++i) {
 		IID_Guids[i] = uuid;
 		IID_Guids[i].Data4[7] += i;
+		p(UUID_to_String(IID_Guids[i]));
 	}
 
 	std::istringstream ss(conf["LOCALES"]);
@@ -98,6 +96,7 @@ bool read_conf() {
 
 STDAPI DllGetClassObject(REFCLSID objGuid, REFIID factoryGuid, void **factoryHandle) {
 	debugp p(__FUNCTION__);
+	p(UUID_to_String(objGuid));
 	HRESULT hr = CLASS_E_CLASSNOTAVAILABLE;
 	*factoryHandle = nullptr;
 
@@ -134,9 +133,3 @@ BOOL WINAPI DllMain(HINSTANCE instance, DWORD fdwReason, LPVOID lpvReserved) {
 
 	return 1;
 }
-
-#ifdef _MSC_VER
-	#pragma comment(linker, "/export:DllGetClassObject=_DllGetClassObject@12")
-	#pragma comment(linker, "/export:DllCanUnloadNow=_DllCanUnloadNow@0")
-	//#pragma comment(linker, "/entry:DllMain")
-#endif

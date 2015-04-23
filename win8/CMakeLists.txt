@@ -13,4 +13,6 @@ add_library(speller-win8 SHARED
 	Speller.hpp
 	SpellerFactory.hpp
 	${CMAKE_SOURCE_DIR}/include/debugp.hpp
+
+	Speller.def
 	)
