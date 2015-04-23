@@ -14,6 +14,7 @@ locale(std::move(locale))
 
 HRESULT STDMETHODCALLTYPE Speller::QueryInterface(REFIID riid, _COM_Outptr_ void **ppvObject) {
 	debugp p(__FUNCTION__);
+	p(UUID_to_String(riid));
 	if (ppvObject == nullptr) {
 		return E_POINTER;
 	}
