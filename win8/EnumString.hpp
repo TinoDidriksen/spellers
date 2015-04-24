@@ -10,29 +10,40 @@
 #include <string>
 #include <algorithm>
 #include <ObjIdl.h>
+#include "DLL.hpp"
+#include <debugp.hpp>
 
 template<typename String>
 inline void CoCopyWString(const String& in, PWSTR* out) {
+	debugp p(__FUNCTION__);
+	p(in);
 	*out = reinterpret_cast<LPWSTR>(CoTaskMemAlloc(sizeof(wchar_t)*(in.size() + 1)));
 	std::copy(in.begin(), in.end(), *out);
+	(*out)[in.size()] = 0;
+	p(std::wstring(*out));
 }
 
 class EnumString : public IEnumString {
 public:
 	EnumString() {
+		debugp p(__FUNCTION__);
 	}
 
 	EnumString(std::vector<std::wstring> strings) :
 		strings(strings)
 	{
+		debugp p(__FUNCTION__);
 	}
 
 	STDMETHODIMP_(ULONG) AddRef() {
+		debugp p(__FUNCTION__);
 		return InterlockedIncrement(&refcount);
 	}
 
 	STDMETHODIMP_(ULONG) Release() {
+		debugp p(__FUNCTION__);
 		if (InterlockedDecrement(&refcount) == 0) {
+			p(__LINE__);
 			delete this;
 			return 0;
 		}
@@ -41,6 +52,9 @@ public:
 	}
 
 	STDMETHODIMP QueryInterface(REFIID riid, void **ppvObject) {
+		debugp p(__FUNCTION__);
+		p(UUID_to_String(riid));
+		p(ppvObject);
 		if (ppvObject == nullptr) {
 			return E_POINTER;
 		}
@@ -58,6 +72,8 @@ public:
 	}
 
 	STDMETHODIMP Next(ULONG celt, LPOLESTR *rgelt, ULONG *pceltFetched) {
+		debugp p(__FUNCTION__);
+		p(celt);
 		HRESULT hr = S_FALSE;
 
 		ULONG i = 0;
@@ -76,6 +92,8 @@ public:
 	}
 
 	STDMETHODIMP Skip(ULONG celt) {
+		debugp p(__FUNCTION__);
+		p(celt);
 		current += celt;
 
 		if (current >= strings.size()) {
@@ -86,11 +104,13 @@ public:
 	}
 
 	STDMETHODIMP Reset() {
+		debugp p(__FUNCTION__);
 		current = 0;
 		return S_OK;
 	}
 
 	STDMETHODIMP Clone(IEnumString **ppenum) {
+		debugp p(__FUNCTION__);
 		EnumString* pnew = new EnumString(strings);
 		pnew->AddRef();
 		*ppenum = pnew;

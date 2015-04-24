@@ -17,7 +17,7 @@ HRESULT STDMETHODCALLTYPE SpellerFactory::QueryInterface(REFIID riid, _COM_Outpt
 	HRESULT hr = CLASS_E_CLASSNOTAVAILABLE;
 	*ppvObject = nullptr;
 
-	if (riid == IID_IUnknown || riid == IID_IClassFactory /*|| riid == IID_ISpellCheckProviderFactory*/ || riid == IID_Guids[GUID_SpellerFactory]) {
+	if (riid == IID_IUnknown || riid == IID_IClassFactory /*|| riid == IID_ISpellCheckProviderFactory*/ || riid == IID_Guid) {
 		*ppvObject = this;
 		hr = S_OK;
 		AddRef();

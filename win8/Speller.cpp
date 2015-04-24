@@ -10,6 +10,8 @@
 Speller::Speller(std::wstring locale) :
 locale(std::move(locale))
 {
+	debugp p(__FUNCTION__);
+	p(locale);
 }
 
 HRESULT STDMETHODCALLTYPE Speller::QueryInterface(REFIID riid, _COM_Outptr_ void **ppvObject) {
@@ -22,7 +24,7 @@ HRESULT STDMETHODCALLTYPE Speller::QueryInterface(REFIID riid, _COM_Outptr_ void
 	HRESULT hr = E_NOINTERFACE;
 	*ppvObject = nullptr;
 
-	if (riid == IID_IUnknown /*|| riid == IID_ISpellCheckProvider*/ || riid == IID_Guids[GUID_Speller]) {
+	if (riid == IID_IUnknown /*|| riid == IID_ISpellCheckProvider*/) {
 		*ppvObject = this;
 		hr = S_OK;
 		AddRef();

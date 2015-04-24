@@ -20,7 +20,7 @@ enum {
 
 extern std::map<std::string, std::string> conf;
 extern std::vector<std::wstring> locales;
-extern GUID IID_Guids[NUM_GUIDS];
+extern GUID IID_Guid;
 extern size_t refs;
 extern size_t locks;
 

@@ -7,26 +7,34 @@
 #define SPELLERFACTORY_HPP_e32d249d_a80d_4cb2_b414_7a61f946815b
 
 #include "Speller.hpp"
+#include "DLL.hpp"
 #include <map>
 #include <string>
 #include <memory>
 #include <spellcheckprovider.h>
-#include <windows.h>
+#include <atlbase.h>
+#include <atlcom.h>
 
-class SpellerFactory : public ISpellCheckProviderFactory {
+class DECLSPEC_UUID("A3AC5A53-231B-44A2-A28B-E59CCA979FB0") SpellerFactory : public ISpellCheckProviderFactory
+	, public ATL::CComCoClass<SpellerFactory, &IID_Guid> // ATL implementation for CreateInstance, etc...
+	, public ATL::CComObjectRootEx<ATL::CComMultiThreadModelNoCS> // ATL implementation for IUnknown
+{
 public:
-	HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, _COM_Outptr_ void **ppvObject);
-	ULONG STDMETHODCALLTYPE AddRef();
-	ULONG STDMETHODCALLTYPE Release();
-
 	IFACEMETHOD(IsSupported)(_In_ PCWSTR languageTag, _Out_ BOOL* value);
 	IFACEMETHOD(CreateSpellCheckProvider)(_In_ PCWSTR languageTag, _COM_Outptr_ ISpellCheckProvider** value);
 
 	IFACEMETHOD(get_SupportedLanguages)(_COM_Outptr_ IEnumString** value);
 
+	DECLARE_REGISTRY_RESOURCEID(101)
+	BEGIN_COM_MAP(SpellerFactory)
+		COM_INTERFACE_ENTRY(ISpellCheckProviderFactory)
+	END_COM_MAP()
+
 private:
 	ULONG refcount = 1;
 	std::map<std::wstring, std::unique_ptr<Speller>> spellers;
 };
+
+OBJECT_ENTRY_AUTO(__uuidof(SpellerFactory), SpellerFactory)
 
 #endif

@@ -14,13 +14,13 @@
 #include <debugp.hpp>
 
 #ifndef NDEBUG
-std::ofstream debug("C:/Temp/Tino/debug-speller.txt", std::ios::binary);
+std::ofstream debug("C:/Temp/Tino/debug-speller.txt");
 size_t debugd = 0;
 #endif
 
 std::map<std::string, std::string> conf;
 std::vector<std::wstring> locales;
-GUID IID_Guids[NUM_GUIDS] = {};
+GUID IID_Guid = {};
 std::unique_ptr<SpellerFactory> factory;
 size_t refs = 0;
 size_t locks = 0;
@@ -65,7 +65,6 @@ bool read_conf() {
 	conf["PATH"] = path;
 
 	p(conf["PATH"]);
-	p(conf["UUID"]);
 
 	GUID uuid;
 	uuid.Data1 = strtoul(conf["UUID"].c_str(), 0, 16);
@@ -79,11 +78,7 @@ bool read_conf() {
 		uuid.Data4[i] = static_cast<uint8_t>(strtoul(bs, 0, 16));
 	}
 
-	for (uint8_t i = 0; i < NUM_GUIDS; ++i) {
-		IID_Guids[i] = uuid;
-		IID_Guids[i].Data4[7] += i;
-		p(UUID_to_String(IID_Guids[i]));
-	}
+	IID_Guid = uuid;
 
 	std::istringstream ss(conf["LOCALES"]);
 	std::string locale;
@@ -94,29 +89,27 @@ bool read_conf() {
 	return true;
 }
 
+class CSampleSpellCheckProviderModule : public CAtlDllModuleT<CSampleSpellCheckProviderModule> {
+} _AtlModule;
+
 STDAPI DllGetClassObject(REFCLSID objGuid, REFIID factoryGuid, void **factoryHandle) {
 	debugp p(__FUNCTION__);
 	p(UUID_to_String(objGuid));
-	HRESULT hr = CLASS_E_CLASSNOTAVAILABLE;
-	*factoryHandle = nullptr;
-
-	if (objGuid == IID_Guids[GUID_SpellerFactory]) {
-		if (!factory) {
-			factory = std::make_unique<SpellerFactory>();
-		}
-		hr = factory->QueryInterface(factoryGuid, factoryHandle);
-	}
-
+	HRESULT hr = _AtlModule.DllGetClassObject(objGuid, factoryGuid, factoryHandle);
+	p(hr);
 	return hr;
 }
 
 STDAPI DllCanUnloadNow() {
 	debugp p(__FUNCTION__);
-	return (refs || locks) ? S_FALSE : S_OK;
+	HRESULT hr = _AtlModule.DllCanUnloadNow();
+	p(hr);
+	return hr;
 }
 
 BOOL WINAPI DllMain(HINSTANCE instance, DWORD fdwReason, LPVOID lpvReserved) {
 	debugp p(__FUNCTION__);
+	p(fdwReason);
 	(void)instance;
 	(void)lpvReserved;
 
@@ -131,5 +124,5 @@ BOOL WINAPI DllMain(HINSTANCE instance, DWORD fdwReason, LPVOID lpvReserved) {
 	}
 	}
 
-	return 1;
+	return _AtlModule.DllMain(fdwReason, lpvReserved);
 }

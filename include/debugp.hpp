@@ -9,6 +9,7 @@
 #include <fstream>
 #include <string>
 
+#undef NDEBUG
 #ifndef NDEBUG
 extern std::ofstream debug;
 extern size_t debugd;
@@ -16,7 +17,7 @@ struct debugp {
 	std::string msg;
 
 	debugp(const std::string& msg) : msg(msg) {
-		debug << std::string(debugd, '\t') << '*' << msg << std::endl;
+		debug << std::string(debugd, '\t') << msg << std::endl;
 		++debugd;
 	}
 

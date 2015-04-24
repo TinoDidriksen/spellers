@@ -29,7 +29,7 @@
 
 #include <debugp.hpp>
 #ifndef NDEBUG
-std::ofstream debug("C:/Temp/Tino/debug-speller.txt", std::ios::binary);
+std::ofstream debug("C:/Temp/Tino/debug-speller.txt");
 size_t debugd = 0;
 #endif
 
