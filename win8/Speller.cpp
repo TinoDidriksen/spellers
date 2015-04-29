@@ -44,8 +44,12 @@ ULONG STDMETHODCALLTYPE Speller::AddRef() {
 
 ULONG STDMETHODCALLTYPE Speller::Release() {
 	debugp p(__FUNCTION__);
-	InterlockedDecrement(&refcount);
-	p(refcount);
+	if (InterlockedDecrement(&refcount) == 0) {
+		p(__LINE__);
+		com_delete(this);
+		return 0;
+	}
+
 	return refcount;
 }
 

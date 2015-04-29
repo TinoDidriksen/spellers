@@ -9,6 +9,12 @@
 
 const IID IID_ISpellCheckProviderFactory = { 0x9F671E11, 0x77D6, 0x4C92, { 0xAE, 0xFB, 0x61, 0x52, 0x15, 0xE3, 0xA4, 0xBE } };
 
+SpellerFactory::~SpellerFactory() {
+	for (auto& it : spellers) {
+		it.second->Release();
+	}
+}
+
 HRESULT STDMETHODCALLTYPE SpellerFactory::QueryInterface(REFIID riid, _COM_Outptr_ void **ppvObject) {
 	debugp p(__FUNCTION__);
 	p(UUID_to_String(riid));
@@ -79,9 +85,10 @@ IFACEMETHODIMP SpellerFactory::CreateSpellCheckProvider(_In_ PCWSTR languageTag,
 
 	std::wstring locale(languageTag);
 	if (!spellers[locale]) {
-		spellers[locale] = std::make_unique<Speller>(locale);
+		spellers[locale] = com_new<Speller>(languageTag);
+		spellers[locale]->AddRef();
 	}
-	*value = spellers[locale].get();
+	*value = spellers[locale];
 
 	return hr;
 }

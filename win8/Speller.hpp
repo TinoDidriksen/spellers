@@ -10,7 +10,7 @@
 #include <spellcheckprovider.h>
 #include <windows.h>
 
-class Speller : public ISpellCheckProvider {
+class DECLSPEC_UUID("73E976E0-8ED4-4EB1-80D7-1BE0A16B0C38") Speller : public ISpellCheckProvider{
 public:
 	Speller(std::wstring locale);
 

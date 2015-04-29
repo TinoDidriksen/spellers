@@ -20,6 +20,8 @@ class DECLSPEC_UUID("A3AC5A53-231B-44A2-A28B-E59CCA979FB0") SpellerFactory : pub
 	, public ATL::CComObjectRootEx<ATL::CComMultiThreadModelNoCS> // ATL implementation for IUnknown
 {
 public:
+	~SpellerFactory();
+
 	IFACEMETHOD(IsSupported)(_In_ PCWSTR languageTag, _Out_ BOOL* value);
 	IFACEMETHOD(CreateSpellCheckProvider)(_In_ PCWSTR languageTag, _COM_Outptr_ ISpellCheckProvider** value);
 
@@ -30,9 +32,10 @@ public:
 		COM_INTERFACE_ENTRY(ISpellCheckProviderFactory)
 	END_COM_MAP()
 
+	DECLARE_NOT_AGGREGATABLE(SpellerFactory)
 private:
 	ULONG refcount = 1;
-	std::map<std::wstring, std::unique_ptr<Speller>> spellers;
+	std::map<std::wstring, Speller*> spellers;
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(SpellerFactory), SpellerFactory)

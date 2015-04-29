@@ -9,6 +9,7 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <memory>
 #include <cctype>
 #include <guiddef.h>
 
@@ -23,6 +24,34 @@ extern std::vector<std::wstring> locales;
 extern GUID IID_Guid;
 extern size_t refs;
 extern size_t locks;
+
+template <typename T>
+inline T identity(T);
+
+template<typename T, typename... Args>
+inline T* com_new(Args&&... args) {
+	char *buf = reinterpret_cast<char*>(CoTaskMemAlloc(sizeof(T)));
+	T *t = new (buf) T(std::forward<Args>(args)...);
+	return t;
+}
+
+template<typename T>
+inline void com_delete(T * t) {
+	t->~T();
+	CoTaskMemFree(t);
+}
+
+template<typename T>
+inline void com_release(T * t) {
+	t->Release();
+}
+
+template<typename T, typename... Args>
+inline std::unique_ptr<T, decltype(identity(&com_release<T>))> com_make_unique(Args&&... args) {
+	T *t = com_new<T>(std::forward<Args>(args)...);
+	std::unique_ptr<T, decltype(identity(&com_release<T>))> u(t, com_release<T>);
+	return u;
+}
 
 inline std::string UUID_to_String(REFIID guid) {
 	std::string uuid(36, 0);
