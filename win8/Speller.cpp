@@ -7,8 +7,10 @@
 #include "EnumString.hpp"
 #include <debugp.hpp>
 
-Speller::Speller(std::wstring locale) :
-locale(std::move(locale))
+const IID IID_ISpellCheckProvider = { 0x0C58F8DE, 0x8E94, 0x479E, { 0x97, 0x17, 0x70, 0xC4, 0x2C, 0x4A, 0xD2, 0xC3 } };
+
+Speller::Speller(std::wstring locale_) :
+locale(std::move(locale_))
 {
 	debugp p(__FUNCTION__);
 	p(locale);
@@ -24,7 +26,7 @@ HRESULT STDMETHODCALLTYPE Speller::QueryInterface(REFIID riid, _COM_Outptr_ void
 	HRESULT hr = E_NOINTERFACE;
 	*ppvObject = nullptr;
 
-	if (riid == IID_IUnknown /*|| riid == IID_ISpellCheckProvider*/) {
+	if (riid == IID_IUnknown || riid == IID_ISpellCheckProvider) {
 		*ppvObject = this;
 		hr = S_OK;
 		AddRef();
@@ -36,12 +38,14 @@ HRESULT STDMETHODCALLTYPE Speller::QueryInterface(REFIID riid, _COM_Outptr_ void
 ULONG STDMETHODCALLTYPE Speller::AddRef() {
 	debugp p(__FUNCTION__);
 	InterlockedIncrement(&refcount);
+	p(refcount);
 	return refcount;
 }
 
 ULONG STDMETHODCALLTYPE Speller::Release() {
 	debugp p(__FUNCTION__);
 	InterlockedDecrement(&refcount);
+	p(refcount);
 	return refcount;
 }
 

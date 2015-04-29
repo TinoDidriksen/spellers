@@ -7,6 +7,8 @@
 #include "EnumString.hpp"
 #include <debugp.hpp>
 
+const IID IID_ISpellCheckProviderFactory = { 0x9F671E11, 0x77D6, 0x4C92, { 0xAE, 0xFB, 0x61, 0x52, 0x15, 0xE3, 0xA4, 0xBE } };
+
 HRESULT STDMETHODCALLTYPE SpellerFactory::QueryInterface(REFIID riid, _COM_Outptr_ void **ppvObject) {
 	debugp p(__FUNCTION__);
 	p(UUID_to_String(riid));
@@ -17,7 +19,7 @@ HRESULT STDMETHODCALLTYPE SpellerFactory::QueryInterface(REFIID riid, _COM_Outpt
 	HRESULT hr = CLASS_E_CLASSNOTAVAILABLE;
 	*ppvObject = nullptr;
 
-	if (riid == IID_IUnknown || riid == IID_IClassFactory /*|| riid == IID_ISpellCheckProviderFactory*/ || riid == IID_Guid) {
+	if (riid == IID_IUnknown || riid == IID_IClassFactory || riid == IID_ISpellCheckProviderFactory || riid == IID_Guid) {
 		*ppvObject = this;
 		hr = S_OK;
 		AddRef();

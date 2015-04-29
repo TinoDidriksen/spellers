@@ -9,7 +9,6 @@
 #include <fstream>
 #include <string>
 
-#undef NDEBUG
 #ifndef NDEBUG
 extern std::ofstream debug;
 extern size_t debugd;
