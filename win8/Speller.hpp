@@ -6,15 +6,18 @@
 #ifndef SPELLER_HPP_e32d249d_a80d_4cb2_b414_7a61f946815b
 #define SPELLER_HPP_e32d249d_a80d_4cb2_b414_7a61f946815b
 
+#include <vector>
 #include <string>
 #include <map>
 #include <unordered_set>
+#include <unordered_map>
 #include <spellcheckprovider.h>
 #include <windows.h>
 
 class Speller : public ISpellCheckProvider{
 public:
 	Speller(std::wstring locale);
+	~Speller();
 
 	HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, _COM_Outptr_ void **ppvObject);
 	ULONG STDMETHODCALLTYPE AddRef();
@@ -33,9 +36,20 @@ public:
 	IFACEMETHOD(get_OptionIds)(_COM_Outptr_ IEnumString** value);
 
 private:
+	bool checkValidWord(const std::wstring& word, size_t suggs = 0);
+
 	ULONG refcount = 1;
 	std::wstring locale;
 	std::map<WORDLIST_TYPE, std::unordered_set<std::wstring>> wordlists;
+
+	HANDLE g_hChildStd_IN_Rd = 0;
+	HANDLE g_hChildStd_IN_Wr = 0;
+	HANDLE g_hChildStd_OUT_Rd = 0;
+	HANDLE g_hChildStd_OUT_Wr = 0;
+	std::unordered_set<std::wstring> valid_words;
+	std::unordered_map<std::wstring, std::vector<std::wstring>> invalid_words;
+	std::string cbuffer;
+	std::wstring wbuffer;
 };
 
 #endif

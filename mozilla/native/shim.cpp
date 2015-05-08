@@ -14,8 +14,6 @@
 
 #ifdef _WIN32
 	#include <windows.h>
-	#include <direct.h>
-	#define chdir _chdir
 
 	#ifdef DLL_EXPORTS
 		#define SPELLER_API __declspec(dllexport)
@@ -207,11 +205,10 @@ extern "C" int SPELLER_API shim_init() {
 	}
 
 	path.append("backend");
-	if (chdir(path.c_str()) != 0) {
-		return -__LINE__;
-	}
 
-	std::string cmdline(conf["ENGINE"].begin(), conf["ENGINE"].end());
+	std::string cmdline(path);
+	cmdline += '/';
+	cmdline.append(conf["ENGINE"].begin(), conf["ENGINE"].end());
 	cmdline.append(1, 0);
 
 	BOOL bSuccess = CreateProcessA(0,
