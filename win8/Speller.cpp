@@ -44,6 +44,7 @@ ULONG STDMETHODCALLTYPE Speller::AddRef() {
 
 ULONG STDMETHODCALLTYPE Speller::Release() {
 	debugp p(__FUNCTION__);
+
 	if (InterlockedDecrement(&refcount) == 0) {
 		p(__LINE__);
 		com_delete(this);
@@ -73,7 +74,7 @@ IFACEMETHODIMP Speller::get_LocalizedName(_Out_ PWSTR* value) {
 
 IFACEMETHODIMP Speller::get_OptionIds(_COM_Outptr_ IEnumString** value) {
 	debugp p(__FUNCTION__);
-	*value = nullptr;
+	*value = com_new<EnumString>();
 	return S_OK;
 }
 
@@ -85,7 +86,7 @@ IFACEMETHODIMP Speller::Check(_In_ PCWSTR text, _COM_Outptr_ IEnumSpellingError*
 
 IFACEMETHODIMP Speller::Suggest(_In_ PCWSTR word, _COM_Outptr_ IEnumString** value) {
 	debugp p(__FUNCTION__);
-	*value = nullptr;
+	*value = com_new<EnumString>();
 	return S_OK;
 }
 
@@ -102,11 +103,14 @@ IFACEMETHODIMP Speller::SetOptionValue(_In_ PCWSTR optionId, BYTE value) {
 IFACEMETHODIMP Speller::InitializeWordlist(WORDLIST_TYPE wordlistType, _In_ IEnumString* words) {
 	debugp p(__FUNCTION__);
 	HRESULT hr = S_OK;
-	while (S_OK == hr) {
+	while (hr == S_OK) {
 		LPOLESTR lpWord;
 		hr = words->Next(1, &lpWord, nullptr);
 
-		if (S_OK == hr) {
+		if (hr == S_OK) {
+			p(wordlistType);
+			p(std::wstring(lpWord));
+			wordlists[wordlistType].insert(lpWord);
 			CoTaskMemFree(lpWord);
 		}
 	}

@@ -44,7 +44,7 @@ public:
 		debugp p(__FUNCTION__);
 		if (InterlockedDecrement(&refcount) == 0) {
 			p(__LINE__);
-			delete this;
+			com_delete(this);
 			return 0;
 		}
 

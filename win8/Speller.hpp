@@ -7,10 +7,12 @@
 #define SPELLER_HPP_e32d249d_a80d_4cb2_b414_7a61f946815b
 
 #include <string>
+#include <map>
+#include <unordered_set>
 #include <spellcheckprovider.h>
 #include <windows.h>
 
-class DECLSPEC_UUID("73E976E0-8ED4-4EB1-80D7-1BE0A16B0C38") Speller : public ISpellCheckProvider{
+class Speller : public ISpellCheckProvider{
 public:
 	Speller(std::wstring locale);
 
@@ -33,6 +35,7 @@ public:
 private:
 	ULONG refcount = 1;
 	std::wstring locale;
+	std::map<WORDLIST_TYPE, std::unordered_set<std::wstring>> wordlists;
 };
 
 #endif

@@ -25,7 +25,7 @@ HRESULT STDMETHODCALLTYPE SpellerFactory::QueryInterface(REFIID riid, _COM_Outpt
 	HRESULT hr = CLASS_E_CLASSNOTAVAILABLE;
 	*ppvObject = nullptr;
 
-	if (riid == IID_IUnknown || riid == IID_IClassFactory || riid == IID_ISpellCheckProviderFactory || riid == IID_Guid) {
+	if (riid == IID_IUnknown || riid == IID_ISpellCheckProviderFactory || riid == IID_Guid) {
 		*ppvObject = this;
 		hr = S_OK;
 		AddRef();
@@ -37,12 +37,19 @@ HRESULT STDMETHODCALLTYPE SpellerFactory::QueryInterface(REFIID riid, _COM_Outpt
 ULONG STDMETHODCALLTYPE SpellerFactory::AddRef() {
 	debugp p(__FUNCTION__);
 	InterlockedIncrement(&refcount);
+	p(refcount);
 	return refcount;
 }
 
 ULONG STDMETHODCALLTYPE SpellerFactory::Release() {
 	debugp p(__FUNCTION__);
-	InterlockedDecrement(&refcount);
+
+	if (InterlockedDecrement(&refcount) == 0) {
+		p(__LINE__);
+		com_delete(this);
+		return 0;
+	}
+
 	return refcount;
 }
 
@@ -51,7 +58,7 @@ IFACEMETHODIMP SpellerFactory::get_SupportedLanguages(_COM_Outptr_ IEnumString**
 	if (value == nullptr) {
 		return E_POINTER;
 	}
-	*value = new EnumString(locales);
+	*value = com_new<EnumString>(locales);
 	return S_OK;
 }
 
