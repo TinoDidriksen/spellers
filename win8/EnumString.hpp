@@ -52,7 +52,7 @@ public:
 	}
 
 	STDMETHODIMP QueryInterface(REFIID riid, void **ppvObject) {
-		debugp p(__FUNCTION__);
+		//debugp p(__FUNCTION__);
 		if (ppvObject == nullptr) {
 			return E_POINTER;
 		}

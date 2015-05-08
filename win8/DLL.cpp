@@ -9,7 +9,7 @@
 #include <memory>
 #include <cstdint>
 #include "DLL.hpp"
-#include "SpellerFactory.hpp"
+#include "ClassFactory.hpp"
 #include <windows.h>
 #include <debugp.hpp>
 
@@ -21,7 +21,7 @@ size_t debugd = 0;
 std::map<std::string, std::string> conf;
 std::vector<std::wstring> locales;
 GUID IID_Guid = {};
-std::unique_ptr<SpellerFactory> factory;
+std::unique_ptr<ClassFactory> factory;
 size_t refs = 0;
 size_t locks = 0;
 
@@ -89,22 +89,25 @@ bool read_conf() {
 	return true;
 }
 
-class CSampleSpellCheckProviderModule : public CAtlDllModuleT<CSampleSpellCheckProviderModule> {
-} _AtlModule;
-
 STDAPI DllGetClassObject(REFCLSID objGuid, REFIID factoryGuid, void **factoryHandle) {
 	debugp p(__FUNCTION__);
 	p(UUID_to_String(objGuid));
-	HRESULT hr = _AtlModule.DllGetClassObject(objGuid, factoryGuid, factoryHandle);
-	p(hr);
+	HRESULT hr = CLASS_E_CLASSNOTAVAILABLE;
+	*factoryHandle = nullptr;
+
+	if (objGuid == IID_Guid) {
+		if (!factory) {
+			factory = std::make_unique<ClassFactory>();
+		}
+		hr = factory->QueryInterface(factoryGuid, factoryHandle);
+	}
+
 	return hr;
 }
 
 STDAPI DllCanUnloadNow() {
 	debugp p(__FUNCTION__);
-	HRESULT hr = _AtlModule.DllCanUnloadNow();
-	p(hr);
-	return hr;
+	return (refs || locks) ? S_FALSE : S_OK;
 }
 
 BOOL WINAPI DllMain(HINSTANCE instance, DWORD fdwReason, LPVOID lpvReserved) {
@@ -124,5 +127,5 @@ BOOL WINAPI DllMain(HINSTANCE instance, DWORD fdwReason, LPVOID lpvReserved) {
 	}
 	}
 
-	return _AtlModule.DllMain(fdwReason, lpvReserved);
+	return 1;
 }
