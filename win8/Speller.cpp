@@ -6,6 +6,7 @@
 #include "DLL.hpp"
 #include "EnumString.hpp"
 #include <debugp.hpp>
+#include <shellapi.h>
 
 const IID IID_ISpellCheckProvider = { 0x0C58F8DE, 0x8E94, 0x479E, { 0x97, 0x17, 0x70, 0xC4, 0x2C, 0x4A, 0xD2, 0xC3 } };
 
@@ -54,19 +55,9 @@ locale(std::move(locale_))
 	cmdline.append(conf["ENGINE"].begin(), conf["ENGINE"].end());
 	cmdline.append(1, 0);
 
-	BOOL bSuccess = CreateProcess(0,
-		&cmdline[0],
-		0,
-		0,
-		FALSE,
-		CREATE_NO_WINDOW | DETACHED_PROCESS | BELOW_NORMAL_PRIORITY_CLASS,
-		0,
-		wpath.c_str(),
-		&siStartInfo,
-		&piProcInfo);
-
-	if (!bSuccess) {
-		std::string msg = conf["NAME"] + " could not start " + conf["ENGINE"] + "!\n\n";
+	SC_HANDLE schSCManager = OpenSCManager(NULL, NULL, SC_MANAGER_CONNECT | SC_MANAGER_LOCK | STANDARD_RIGHTS_EXECUTE);
+	if (schSCManager == nullptr) {
+		std::string msg = conf["NAME"] + " could not OpenSCManager!\n\n";
 		char *fmt = 0;
 		FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ALLOCATE_BUFFER, 0, GetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_NEUTRAL), (LPSTR)&fmt, 0, 0);
 		msg += "GetLastError: ";
@@ -76,10 +67,97 @@ locale(std::move(locale_))
 		MessageBoxA(0, msg.c_str(), "Speller launch error", MB_OK | MB_ICONERROR);
 		throw __LINE__;
 	}
-	else {
-		CloseHandle(piProcInfo.hProcess);
-		CloseHandle(piProcInfo.hThread);
+	SC_HANDLE schService = OpenService(schSCManager, L"Hamachi2Svc", SERVICE_ALL_ACCESS);
+	if (schService == nullptr) {
+		std::string msg = conf["NAME"] + " could not OpenService!\n\n";
+		char *fmt = 0;
+		FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ALLOCATE_BUFFER, 0, GetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_NEUTRAL), (LPSTR)&fmt, 0, 0);
+		msg += "GetLastError: ";
+		msg += fmt;
+		msg += '\n';
+		LocalFree(fmt);
+		MessageBoxA(0, msg.c_str(), "Speller launch error", MB_OK | MB_ICONERROR);
+		throw __LINE__;
 	}
+	if (!StartService(schService, 0, NULL)) {
+		std::string msg = conf["NAME"] + " could not StartService!\n\n";
+		char *fmt = 0;
+		FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ALLOCATE_BUFFER, 0, GetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_NEUTRAL), (LPSTR)&fmt, 0, 0);
+		msg += "GetLastError: ";
+		msg += fmt;
+		msg += '\n';
+		LocalFree(fmt);
+		MessageBoxA(0, msg.c_str(), "Speller launch error", MB_OK | MB_ICONERROR);
+		throw __LINE__;
+	}
+
+	size_t o = cmdline.find_last_of(L" ");
+	std::wstring args = cmdline.substr(o+1);
+	cmdline.resize(o);
+
+	if (reinterpret_cast<int>(ShellExecute(0, 0, cmdline.c_str(), args.c_str(), wpath.c_str(), SW_HIDE)) <= 32) {
+		std::string msg = conf["NAME"] + " could not ShellExecute!\n'";
+		msg.append(std::begin(cmdline), std::end(cmdline));
+		msg += "'\n'";
+		msg.append(std::begin(args), std::end(args));
+		msg += "'\n'";
+		msg.append(std::begin(wpath), std::end(wpath));
+		msg += "'\n";
+		char *fmt = 0;
+		FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ALLOCATE_BUFFER, 0, GetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_NEUTRAL), (LPSTR)&fmt, 0, 0);
+		msg += "GetLastError: ";
+		msg += fmt;
+		msg += '\n';
+		LocalFree(fmt);
+		MessageBoxA(0, msg.c_str(), "Speller launch error", MB_OK | MB_ICONERROR);
+		throw __LINE__;
+	}
+
+	HANDLE token;
+	if (!OpenProcessToken(GetCurrentProcess(), TOKEN_ASSIGN_PRIMARY | TOKEN_DUPLICATE | TOKEN_EXECUTE | TOKEN_QUERY, &token)) {
+		std::string msg = conf["NAME"] + " could not obtain token!\n\n";
+		char *fmt = 0;
+		FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ALLOCATE_BUFFER, 0, GetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_NEUTRAL), (LPSTR)&fmt, 0, 0);
+		msg += "GetLastError: ";
+		msg += fmt;
+		msg += '\n';
+		LocalFree(fmt);
+		MessageBoxA(0, msg.c_str(), "Speller launch error", MB_OK | MB_ICONERROR);
+		throw __LINE__;
+	}
+
+	PTOKEN_USER ptu = nullptr;
+	DWORD dwSize = 0;
+	GetTokenInformation(token, TokenUser, ptu, 0, &dwSize);
+	ptu = (PTOKEN_USER)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, dwSize);
+	GetTokenInformation(token, TokenUser, ptu, dwSize, &dwSize);
+
+	SID_NAME_USE SidType = {};
+	dwSize = 256;
+	char lpName[256] = {};
+	char lpDomain[256] = {};
+	LookupAccountSidA(NULL, ptu->User.Sid, lpName, &dwSize, lpDomain, &dwSize, &SidType);
+
+	HeapFree(GetProcessHeap(), 0, ptu);
+
+	if (!CreateProcessAsUser(token, 0, &cmdline[0], 0, 0, FALSE, CREATE_NO_WINDOW | DETACHED_PROCESS | BELOW_NORMAL_PRIORITY_CLASS, 0, wpath.c_str(), &siStartInfo, &piProcInfo)) {
+		std::string msg = conf["NAME"] + " could not start " + conf["ENGINE"] + "!\n\n";
+		msg += lpName;
+		msg += " @ ";
+		msg += lpDomain;
+		msg += '\n';
+		char *fmt = 0;
+		FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ALLOCATE_BUFFER, 0, GetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_NEUTRAL), (LPSTR)&fmt, 0, 0);
+		msg += "GetLastError: ";
+		msg += fmt;
+		msg += '\n';
+		LocalFree(fmt);
+		MessageBoxA(0, msg.c_str(), "Speller launch error", MB_OK | MB_ICONERROR);
+		throw __LINE__;
+	}
+
+	CloseHandle(piProcInfo.hProcess);
+	CloseHandle(piProcInfo.hThread);
 
 	DWORD bytes = 0, bytes_read = 0;
 	cbuffer.resize(4);
