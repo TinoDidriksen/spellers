@@ -28,7 +28,7 @@
 #include <debugp.hpp>
 #ifndef NDEBUG
 std::ofstream debug("C:/Temp/Tino/debug-speller.txt");
-size_t debugd = 0;
+thread_local size_t debugd = 0;
 #endif
 
 // Unnamed namespace to hide all these globals

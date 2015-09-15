@@ -1,7 +1,22 @@
 /*
-	Copyright (C) 2015, Tino Didriksen <mail@tinodidriksen.com>
-	Licensed under the GNU GPL version 3 or later; see http://www.gnu.org/licenses/
+* Copyright (C) 2015, Tino Didriksen <mail@tinodidriksen.com>
+*
+* This file is part of Spellers
+*
+* Spellers is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* Spellers is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with Spellers.  If not, see <http://www.gnu.org/licenses/>.
 */
+
 #pragma once
 #ifndef SPELLER_HPP_e32d249d_a80d_4cb2_b414_7a61f946815b
 #define SPELLER_HPP_e32d249d_a80d_4cb2_b414_7a61f946815b
@@ -42,10 +57,6 @@ private:
 	std::wstring locale;
 	std::map<WORDLIST_TYPE, std::unordered_set<std::wstring>> wordlists;
 
-	HANDLE g_hChildStd_IN_Rd = 0;
-	HANDLE g_hChildStd_IN_Wr = 0;
-	HANDLE g_hChildStd_OUT_Rd = 0;
-	HANDLE g_hChildStd_OUT_Wr = 0;
 	std::unordered_set<std::wstring> valid_words;
 	std::unordered_map<std::wstring, std::vector<std::wstring>> invalid_words;
 	std::string cbuffer;

@@ -1,7 +1,22 @@
 /*
-	Copyright (C) 2015, Tino Didriksen <mail@tinodidriksen.com>
-	Licensed under the GNU GPL version 3 or later; see http://www.gnu.org/licenses/
+* Copyright (C) 2015, Tino Didriksen <mail@tinodidriksen.com>
+*
+* This file is part of Spellers
+*
+* Spellers is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* Spellers is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with Spellers.  If not, see <http://www.gnu.org/licenses/>.
 */
+
 #include <fstream>
 #include <cstdlib>
 #include <algorithm>
@@ -11,11 +26,12 @@
 #include "DLL.hpp"
 #include "ClassFactory.hpp"
 #include <windows.h>
+#include <shared.hpp>
 #include <debugp.hpp>
 
 #ifndef NDEBUG
-std::ofstream debug("C:/Temp/Tino/debug-speller.txt");
-size_t debugd = 0;
+std::ofstream debug("C:/Temp/Tino/debug-speller-win8.txt");
+thread_local size_t debugd = 0;
 #endif
 
 std::map<std::string, std::string> conf;
@@ -27,44 +43,10 @@ size_t locks = 0;
 
 bool read_conf() {
 	debugp p(__FUNCTION__);
-	MEMORY_BASIC_INFORMATION mbiInfo = { 0 };
-	std::string path(MAX_PATH + 1, 0);
-	if (VirtualQuery(read_conf, &mbiInfo, sizeof(mbiInfo))) {
-		GetModuleFileNameA((HMODULE)(mbiInfo.AllocationBase), &path[0], MAX_PATH);
-	}
-	if (path[0] == 0) {
-		#ifdef _WIN64
-		GetModuleFileNameA(GetModuleHandleA("speller-win8.dll"), &path[0], MAX_PATH);
-		#else
-		GetModuleFileNameA(GetModuleHandleA("speller-win8.dll"), &path[0], MAX_PATH);
-		#endif
-	}
-	while (!path.empty() && path.back() != '/' && path.back() != '\\') {
-		path.pop_back();
-	}
 
-	std::string line;
-	std::ifstream inif(path + "speller.ini", std::ios::binary);
-	while (std::getline(inif, line)) {
-		line = trim(line);
-		if (line.empty() || line[0] == '#') {
-			continue;
-		}
-
-		size_t eqpos = line.find('=');
-		std::string key = trim(line.substr(0, eqpos));
-		std::string value = trim(line.substr(eqpos + 1));
-
-		conf[key] = value;
-	}
-
-	if (conf.empty() || !conf.count("ENGINE") || !conf.count("UUID") || !conf.count("LOCALES")) {
+	if (!read_conf(conf)) {
 		return false;
 	}
-
-	conf["PATH"] = path;
-
-	p(conf["PATH"]);
 
 	GUID uuid;
 	uuid.Data1 = strtoul(conf["UUID"].c_str(), 0, 16);
