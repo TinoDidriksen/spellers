@@ -169,41 +169,13 @@ DWORD WINAPI service_handler(LPVOID) {
 	debugp p(__FUNCTION__);
 	hfst_init();
 
-	PSID EveryoneSID = nullptr;
-	SID_IDENTIFIER_AUTHORITY SIDAuthWorld = SECURITY_WORLD_SID_AUTHORITY;
-	if (!AllocateAndInitializeSid(&SIDAuthWorld, 1, SECURITY_WORLD_RID, 0, 0, 0, 0, 0, 0, 0, &EveryoneSID)) {
-		p("AllocateAndInitializeSid failed", GetLastError());
-		return GetLastError();
-	}
+	SECURITY_DESCRIPTOR sd;
+	InitializeSecurityDescriptor(&sd, SECURITY_DESCRIPTOR_REVISION);
+	SetSecurityDescriptorDacl(&sd, TRUE, nullptr, FALSE);
 
 	SECURITY_ATTRIBUTES sa = { sizeof(SECURITY_ATTRIBUTES) };
+	sa.lpSecurityDescriptor = &sd;
 	sa.bInheritHandle = FALSE;
-
-	EXPLICIT_ACCESS ace = {};
-	ace.grfAccessMode = SET_ACCESS;
-	ace.grfAccessPermissions = FILE_GENERIC_READ | FILE_GENERIC_WRITE;
-	ace.grfInheritance = NO_INHERITANCE;
-	ace.Trustee.TrusteeForm = TRUSTEE_IS_SID;
-	ace.Trustee.TrusteeType = TRUSTEE_IS_WELL_KNOWN_GROUP;
-	ace.Trustee.ptstrName = (LPTSTR)EveryoneSID;
-
-	PACL acl = nullptr;
-	if (SetEntriesInAcl(1, &ace, nullptr, &acl) != ERROR_SUCCESS) {
-		p("SetEntriesInAcl failed", GetLastError());
-		return GetLastError();
-	}
-
-	auto sd = (PSECURITY_DESCRIPTOR)LocalAlloc(LPTR, SECURITY_DESCRIPTOR_MIN_LENGTH);
-	if (!InitializeSecurityDescriptor(sd, SECURITY_DESCRIPTOR_REVISION)) {
-		p("InitializeSecurityDescriptor failed", GetLastError());
-		return GetLastError();
-	}
-	if (!SetSecurityDescriptorDacl(sd, TRUE, acl, FALSE)) {
-		p("SetSecurityDescriptorDacl failed", GetLastError());
-		return GetLastError();
-	}
-
-	sa.lpSecurityDescriptor = sd;
 
 	while (WaitForSingleObject(g_svcEvent, 0) != WAIT_OBJECT_0) {
 		Sleep(1000);
