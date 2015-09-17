@@ -26,7 +26,7 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <windows.h>
-#include <aclapi.h>
+#include <sddl.h>
 #include <shared.hpp>
 #include <debugp.hpp>
 
@@ -169,12 +169,13 @@ DWORD WINAPI service_handler(LPVOID) {
 	debugp p(__FUNCTION__);
 	hfst_init();
 
-	SECURITY_DESCRIPTOR sd;
-	InitializeSecurityDescriptor(&sd, SECURITY_DESCRIPTOR_REVISION);
-	SetSecurityDescriptorDacl(&sd, TRUE, nullptr, FALSE);
+	PSECURITY_DESCRIPTOR psd;
+	if (!ConvertStringSecurityDescriptorToSecurityDescriptorA("D:(A;;GA;;;WD)(A;;GA;;;AN)", SDDL_REVISION_1, &psd, nullptr)) {
+		p("ConvertStringSecurityDescriptorToSecurityDescriptor failed", GetLastError());
+	}
 
 	SECURITY_ATTRIBUTES sa = { sizeof(SECURITY_ATTRIBUTES) };
-	sa.lpSecurityDescriptor = &sd;
+	sa.lpSecurityDescriptor = psd;
 	sa.bInheritHandle = FALSE;
 
 	while (WaitForSingleObject(g_svcEvent, 0) != WAIT_OBJECT_0) {
