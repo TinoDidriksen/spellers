@@ -25,6 +25,7 @@
 #include <fstream>
 #include <unordered_map>
 #include <unordered_set>
+#include <memory>
 #include <windows.h>
 #include <sddl.h>
 #include <shared.hpp>
@@ -142,7 +143,7 @@ void WINAPI service_control(DWORD fdwControl) {
 	debugp p(__FUNCTION__);
 
 	switch (fdwControl) {
-	case SERVICE_CONTROL_STOP:
+	case SERVICE_CONTROL_STOP: {
 		p("SERVICE_CONTROL_STOP");
 		if (g_svcStatus.dwCurrentState != SERVICE_RUNNING) {
 			break;
@@ -158,7 +159,10 @@ void WINAPI service_control(DWORD fdwControl) {
 		}
 
 		SetEvent(g_svcEvent);
+		HANDLE pipe = CreateFileA(conf["PIPE"].c_str(), GENERIC_READ | FILE_WRITE_DATA, 0, nullptr, OPEN_EXISTING, 0, nullptr);
+		CloseHandle(pipe);
 		break;
+	}
 
 	default:
 		break;
@@ -181,6 +185,7 @@ DWORD WINAPI service_handler(LPVOID) {
 	while (WaitForSingleObject(g_svcEvent, 0) != WAIT_OBJECT_0) {
 		Sleep(1000);
 		HANDLE pipe = CreateNamedPipeA(conf["PIPE"].c_str(), PIPE_ACCESS_DUPLEX, PIPE_WAIT, 1, 1024, 1024, 7 * 1000, &sa);
+		std::unique_ptr<std::remove_pointer<HANDLE>::type, decltype(&CloseHandle)> pipe_cleaner(pipe, &CloseHandle);
 
 		if (pipe == INVALID_HANDLE_VALUE) {
 			p("CreateNamedPipeA failed", GetLastError());
@@ -242,8 +247,6 @@ DWORD WINAPI service_handler(LPVOID) {
 			p("WriteFile(pipe)", GetLastError());
 			continue;
 		}
-
-		CloseHandle(pipe);
 	}
 
 	hfst_terminate();
