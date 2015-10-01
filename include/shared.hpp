@@ -36,7 +36,7 @@
 #endif
 
 inline std::string trim(std::string str) {
-	while (!str.empty() && std::isspace(str[str.size() - 1])) {
+	while (!str.empty() && (str.back() == 0 || std::isspace(str.back()))) {
 		str.resize(str.size() - 1);
 	}
 	while (!str.empty() && std::isspace(str[0])) {
@@ -48,8 +48,9 @@ inline std::string trim(std::string str) {
 inline bool read_conf(std::map<std::string,std::string>& conf) {
 	debugp p(__FUNCTION__);
 
-	std::string path(MAX_PATH + 1, 0);
+	std::string path;
 #ifdef _WIN32
+	path.resize(MAX_PATH + 1);
 	MEMORY_BASIC_INFORMATION mbiInfo = { 0 };
 	if (VirtualQuery(read_conf, &mbiInfo, sizeof(mbiInfo))) {
 		GetModuleFileNameA((HMODULE)(mbiInfo.AllocationBase), &path[0], MAX_PATH);

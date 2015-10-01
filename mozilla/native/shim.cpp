@@ -26,6 +26,7 @@
 #include <fstream>
 #include <unordered_map>
 #include <unordered_set>
+#include <shared.hpp>
 
 #ifdef _WIN32
 	#include <windows.h>
@@ -70,16 +71,6 @@ std::unordered_set<std::string> valid_words;
 std::unordered_map<std::string, std::vector<std::string>> invalid_words;
 std::vector<const char*> rv_alts;
 std::string cbuffer;
-
-inline std::string trim(std::string str) {
-	while (!str.empty() && (str.back() == 0 || std::isspace(str.back()))) {
-		str.resize(str.size() - 1);
-	}
-	while (!str.empty() && std::isspace(str[0])) {
-		str.erase(str.begin());
-	}
-	return str;
-}
 
 #ifdef _WIN32
 void showLastError(const std::string& err) {
@@ -222,47 +213,13 @@ extern "C" int SPELLER_API shim_init() {
 	siStartInfo.hStdOutput = g_hChildStd_OUT_Wr;
 	siStartInfo.hStdInput = g_hChildStd_IN_Rd;
 	siStartInfo.dwFlags |= STARTF_USESTDHANDLES;
-
-	MEMORY_BASIC_INFORMATION mbiInfo = { 0 };
-	std::string path(MAX_PATH + 1, 0);
-	if (VirtualQuery(shim_init, &mbiInfo, sizeof(mbiInfo))) {
-		GetModuleFileNameA((HMODULE)(mbiInfo.AllocationBase), &path[0], MAX_PATH);
-	}
-	if (path[0] == 0) {
-		#ifdef _WIN64
-		GetModuleFileNameA(GetModuleHandleA("shim64.dll"), &path[0], MAX_PATH);
-		#else
-		GetModuleFileNameA(GetModuleHandleA("shim32.dll"), &path[0], MAX_PATH);
-		#endif
-	}
-#else
-	Dl_info dl_info;
-	dladdr((void*)shim_init, &dl_info);
-	std::string path(dl_info.dli_fname);
 #endif
-	while (!path.empty() && path.back() != '/' && path.back() != '\\') {
-		path.pop_back();
-	}
 
-	std::string line;
-	std::ifstream inif(path + "speller.ini", std::ios::binary);
-	while (std::getline(inif, line)) {
-		line = trim(line);
-		if (line.empty() || line[0] == '#') {
-			continue;
-		}
-
-		size_t eqpos = line.find('=');
-		std::string key = trim(line.substr(0, eqpos));
-		std::string value = trim(line.substr(eqpos + 1));
-
-		conf[key] = value;
-	}
-
-	if (conf.empty() || !conf.count("ENGINE")) {
+	if (!read_conf(conf)) {
 		return -__LINE__;
 	}
 
+	std::string path = conf["PATH"];
 	path.append("backend");
 
 	std::string cmdline(path);
