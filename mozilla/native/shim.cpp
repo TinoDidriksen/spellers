@@ -1,7 +1,22 @@
 /*
-	Copyright (C) 2015, Tino Didriksen <mail@tinodidriksen.com>
-	Licensed under the GNU GPL version 3 or later; see http://www.gnu.org/licenses/
+* Copyright (C) 2015, Tino Didriksen <mail@tinodidriksen.com>
+*
+* This file is part of Spellers
+*
+* Spellers is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* Spellers is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with Spellers.  If not, see <http://www.gnu.org/licenses/>.
 */
+
 #include <vector>
 #include <set>
 #include <string>
@@ -21,8 +36,16 @@
 		#define SPELLER_API __declspec(dllimport)
 	#endif
 #else
+	#define _GNU_SOURCE
+	#include <dlfcn.h>
 	#include <unistd.h>
-	#define SPELLER_API
+	#include <popen_plus.h>
+
+	#ifdef DLL_EXPORTS
+		#define SPELLER_API __attribute__ ((visibility ("default")))
+	#else
+		#define SPELLER_API
+	#endif
 #endif
 
 #include <debugp.hpp>
@@ -33,10 +56,14 @@ thread_local size_t debugd = 0;
 
 // Unnamed namespace to hide all these globals
 namespace {
+#ifdef _WIN32
 HANDLE g_hChildStd_IN_Rd = 0;
 HANDLE g_hChildStd_IN_Wr = 0;
 HANDLE g_hChildStd_OUT_Rd = 0;
 HANDLE g_hChildStd_OUT_Wr = 0;
+#else
+popen_plus_process *child = 0;
+#endif
 
 std::map<std::string, std::string> conf;
 std::unordered_set<std::string> valid_words;
@@ -45,7 +72,7 @@ std::vector<const char*> rv_alts;
 std::string cbuffer;
 
 inline std::string trim(std::string str) {
-	while (!str.empty() && std::isspace(str[str.size() - 1])) {
+	while (!str.empty() && (str.back() == 0 || std::isspace(str.back()))) {
 		str.resize(str.size() - 1);
 	}
 	while (!str.empty() && std::isspace(str[0])) {
@@ -54,6 +81,7 @@ inline std::string trim(std::string str) {
 	return str;
 }
 
+#ifdef _WIN32
 void showLastError(const std::string& err) {
 	std::string msg = conf["NAME"] + " error location: ";
 	msg += err;
@@ -66,9 +94,19 @@ void showLastError(const std::string& err) {
 	LocalFree(fmt);
 	MessageBoxA(0, msg.c_str(), "Speller Error", MB_OK|MB_ICONERROR);
 }
+#else
+std::string formatLastError(std::string msg = "") {
+	if (!msg.empty()) {
+		msg += ' ';
+	}
+	msg += "strerror: ";
+	msg += strerror(errno);
+	return msg;
+}
+#endif
 
 bool checkValidWord(const std::string& word, size_t suggs = 0) {
-	debugp p("checkValidWord");
+	debugp p(__FUNCTION__);
 	p(word);
 
 	if (valid_words.find(word) != valid_words.end()) {
@@ -83,6 +121,7 @@ bool checkValidWord(const std::string& word, size_t suggs = 0) {
 	cbuffer += word;
 	cbuffer += '\n';
 
+#ifdef _WIN32
 	DWORD bytes = 0, bytes_read = 0;
 	if (!WriteFile(g_hChildStd_IN_Wr, cbuffer.c_str(), cbuffer.size(), &bytes, 0) || bytes != cbuffer.size()) {
 		showLastError("checkValidWord WriteFile");
@@ -104,6 +143,19 @@ bool checkValidWord(const std::string& word, size_t suggs = 0) {
 			return false;
 		}
 	}
+#else
+	if (fwrite(cbuffer.c_str(), 1, cbuffer.size(), child->write_fp) != cbuffer.size()) {
+		std::string msg = formatLastError("Process.write(char*,size_t)");
+		throw std::runtime_error(msg);
+	}
+	fflush(child->write_fp);
+	cbuffer.resize(0);
+	cbuffer.resize(2048);
+	for (size_t i=0, off=0 ; (fread(&cbuffer[off], 1, cbuffer.size()-off, child->read_fp) != cbuffer.size()-off) && i<10 ; ++i, off = cbuffer.size()) {
+		std::string msg = formatLastError("Process.read(char*,size_t)");
+		throw std::runtime_error(msg);
+	}
+#endif
 
 	cbuffer = trim(cbuffer);
 
@@ -141,7 +193,9 @@ bool checkValidWord(const std::string& word, size_t suggs = 0) {
 }
 
 extern "C" int SPELLER_API shim_init() {
-	debugp p("shim_init");
+	debugp p(__FUNCTION__);
+
+#ifdef _WIN32
 	SECURITY_ATTRIBUTES saAttr = {sizeof(saAttr), 0, true};
 
 	if (!CreatePipe(&g_hChildStd_OUT_Rd, &g_hChildStd_OUT_Wr, &saAttr, 0)) {
@@ -181,6 +235,11 @@ extern "C" int SPELLER_API shim_init() {
 		GetModuleFileNameA(GetModuleHandleA("shim32.dll"), &path[0], MAX_PATH);
 		#endif
 	}
+#else
+	Dl_info dl_info;
+	dladdr((void*)shim_init, &dl_info);
+	std::string path(dl_info.dli_fname);
+#endif
 	while (!path.empty() && path.back() != '/' && path.back() != '\\') {
 		path.pop_back();
 	}
@@ -211,6 +270,7 @@ extern "C" int SPELLER_API shim_init() {
 	cmdline.append(conf["ENGINE"].begin(), conf["ENGINE"].end());
 	cmdline.append(1, 0);
 
+#ifdef _WIN32
 	BOOL bSuccess = CreateProcessA(0,
 		&cmdline[0],
 		0,
@@ -255,6 +315,22 @@ extern "C" int SPELLER_API shim_init() {
 		return -__LINE__;
 		}
 	}
+#else
+	child = popen_plus(cmdline.c_str());
+	if (child == 0) {
+		std::string msg = "Process could not start!\nCmdline: ";
+		msg += cmdline.c_str();
+		msg += '\n';
+		msg = formatLastError(msg);
+		throw std::runtime_error(msg);
+	}
+
+	cbuffer.resize(31);
+	if (fread(&cbuffer[0], 1, cbuffer.size(), child->read_fp) != cbuffer.size()) {
+		std::string msg = formatLastError("Process.read(char*,size_t)");
+		throw std::runtime_error(msg);
+	}
+#endif
 
 	cbuffer = trim(cbuffer);
 	if (cbuffer != "@@ hfst-ospell-office is alive") {
@@ -265,15 +341,21 @@ extern "C" int SPELLER_API shim_init() {
 }
 
 extern "C" void SPELLER_API shim_terminate() {
-	debugp p("shim_terminate");
+	debugp p(__FUNCTION__);
+
+#ifdef _WIN32
 	CloseHandle(g_hChildStd_IN_Rd);
 	CloseHandle(g_hChildStd_IN_Wr);
 	CloseHandle(g_hChildStd_OUT_Rd);
 	CloseHandle(g_hChildStd_OUT_Wr);
+#else
+	popen_plus_kill(child);
+	popen_plus_close(child);
+#endif
 }
 
 extern "C" int SPELLER_API shim_is_valid_word(const char *word) {
-	debugp p("shim_is_valid_word");
+	debugp p(__FUNCTION__);
 	std::string str(word);
 	p(str);
 	return static_cast<int>(checkValidWord(str));
@@ -281,7 +363,7 @@ extern "C" int SPELLER_API shim_is_valid_word(const char *word) {
 
 typedef const char** ccharpp_t;
 extern "C" ccharpp_t SPELLER_API shim_find_alternatives(const char *word, int suggs) {
-	debugp p("shim_find_alternatives");
+	debugp p(__FUNCTION__);
 	std::string str(word);
 	p(str);
 
