@@ -1,4 +1,5 @@
 # This part is only for Windows 8 and newer
+remove_definitions(-DWINVER=0x0501 -D_WIN32_WINNT=0x0501)
 add_definitions(-DWINVER=0x0602 -D_WIN32_WINNT=0x0602)
 
 add_definitions(-DDLL_EXPORTS)

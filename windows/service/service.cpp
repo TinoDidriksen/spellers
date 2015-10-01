@@ -183,7 +183,6 @@ DWORD WINAPI service_handler(LPVOID) {
 	sa.bInheritHandle = FALSE;
 
 	while (WaitForSingleObject(g_svcEvent, 0) != WAIT_OBJECT_0) {
-		Sleep(1000);
 		HANDLE pipe = CreateNamedPipeA(conf["PIPE"].c_str(), PIPE_ACCESS_DUPLEX, PIPE_WAIT, 1, 1024, 1024, 7 * 1000, &sa);
 		std::unique_ptr<std::remove_pointer<HANDLE>::type, decltype(&CloseHandle)> pipe_cleaner(pipe, &CloseHandle);
 
