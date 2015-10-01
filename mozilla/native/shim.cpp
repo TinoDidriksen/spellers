@@ -224,7 +224,7 @@ extern "C" int SPELLER_API shim_init() {
 
 	std::string cmdline(path);
 	cmdline += '/';
-	cmdline.append(conf["ENGINE"].begin(), conf["ENGINE"].end());
+	cmdline.append(conf["ENGINE"]);
 	cmdline.append(1, 0);
 
 #ifdef _WIN32

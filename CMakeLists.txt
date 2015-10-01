@@ -13,8 +13,8 @@ if(MSVC)
 	set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /LTCG")
 	set(CMAKE_C_FLAGS ${CMAKE_CXX_FLAGS})
 	set(CMAKE_C_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE})
-	# When building on VS 2013, this ensures we use the WinXP compatible toolchain
-	set(CMAKE_GENERATOR_TOOLSET "v120_xp")
+	# When building on VS 2015, this ensures we use the WinXP compatible toolchain
+	set(CMAKE_GENERATOR_TOOLSET "v140_xp")
 else()
 	set(_FLAGS_COMMON "-Wall -Wextra -Wno-missing-field-initializers -Wno-deprecated -Wno-unused-result -Wno-unused-value -Wno-unused-parameter -fPIC -fvisibility=hidden")
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${_FLAGS_COMMON}")
