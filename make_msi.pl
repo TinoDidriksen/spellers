@@ -116,4 +116,6 @@ close FILE;
 
 chdir $dir;
 print `find . -type f -name '*.exe' -or -name '*.dll' | xargs -rn1 /opt/mxe/usr/bin/i686-w64-mingw32.shared-strip`;
+print `rm -fv *.msi`;
 print `wixl -v '$ARGV[0].wxs'`;
+print `mv -v '$ARGV[0].msi' '$ARGV[0]-$ver_dot.msi'`;

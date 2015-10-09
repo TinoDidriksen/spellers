@@ -105,4 +105,5 @@ fill_file('mozilla/'.$js, "$dir/$js", %conf);
 
 chdir $dir;
 print `find . -type f -name '*.exe' -or -name '*.dll' | xargs -rn1 /opt/mxe/usr/bin/i686-w64-mingw32.shared-strip`;
-print `zip -9r '../$ARGV[0].xpi' *`;
+print `rm -fv '../$ARGV[0]'*.xpi`;
+print `zip -9r '../$ARGV[0]-$conf{VERSION_DOT}.xpi' *`;
