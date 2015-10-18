@@ -17,12 +17,12 @@
 * along with Spellers.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "ClassFactory.hpp"
-#include "SpellerFactory.hpp"
+#include "ServiceFactory.hpp"
+#include "service.hpp"
 #include <COM.hpp>
 #include <debugp.hpp>
 
-HRESULT STDMETHODCALLTYPE ClassFactory::QueryInterface(REFIID riid, _COM_Outptr_ void **ppvObject) {
+HRESULT STDMETHODCALLTYPE ServiceFactory::QueryInterface(REFIID riid, _COM_Outptr_ void **ppvObject) {
 	debugp p(__FUNCTION__);
 	p(UUID_to_String(riid));
 	if (ppvObject == nullptr) {
@@ -32,7 +32,7 @@ HRESULT STDMETHODCALLTYPE ClassFactory::QueryInterface(REFIID riid, _COM_Outptr_
 	HRESULT hr = CLASS_E_CLASSNOTAVAILABLE;
 	*ppvObject = nullptr;
 
-	if (riid == IID_IUnknown || riid == IID_IClassFactory || riid == IID_Guid) {
+	if (riid == IID_IUnknown || riid == IID_Guid) {
 		*ppvObject = this;
 		hr = S_OK;
 		AddRef();
@@ -41,19 +41,19 @@ HRESULT STDMETHODCALLTYPE ClassFactory::QueryInterface(REFIID riid, _COM_Outptr_
 	return hr;
 }
 
-ULONG STDMETHODCALLTYPE ClassFactory::AddRef() {
+ULONG STDMETHODCALLTYPE ServiceFactory::AddRef() {
 	debugp p(__FUNCTION__);
 	InterlockedIncrement(&refcount);
 	return refcount;
 }
 
-ULONG STDMETHODCALLTYPE ClassFactory::Release() {
+ULONG STDMETHODCALLTYPE ServiceFactory::Release() {
 	debugp p(__FUNCTION__);
 	InterlockedDecrement(&refcount);
 	return refcount;
 }
 
-HRESULT STDMETHODCALLTYPE ClassFactory::CreateInstance(IUnknown *pUnkOuter, REFIID riid, _COM_Outptr_ void **ppvObject) {
+HRESULT STDMETHODCALLTYPE ServiceFactory::CreateInstance(IUnknown *pUnkOuter, REFIID riid, _COM_Outptr_ void **ppvObject) {
 	debugp p(__FUNCTION__);
 	p(UUID_to_String(riid));
 	if (pUnkOuter) {
@@ -65,8 +65,8 @@ HRESULT STDMETHODCALLTYPE ClassFactory::CreateInstance(IUnknown *pUnkOuter, REFI
 
 	HRESULT hr = E_NOINTERFACE;
 
-	if (riid == IID_IUnknown || riid == IID_ISpellCheckProviderFactory || riid == IID_Guid) {
-		auto ptr = com_new<SpellerFactory>();
+	if (riid == IID_IUnknown || riid == IID_Guid) {
+		auto ptr = com_new<ServiceFactory>();
 		hr = ptr->QueryInterface(riid, ppvObject);
 		ptr->Release();
 	}
@@ -74,6 +74,7 @@ HRESULT STDMETHODCALLTYPE ClassFactory::CreateInstance(IUnknown *pUnkOuter, REFI
 	return hr;
 }
 
-HRESULT STDMETHODCALLTYPE ClassFactory::LockServer(BOOL fLock) {
+HRESULT STDMETHODCALLTYPE ServiceFactory::LockServer(BOOL fLock) {
+	(void)fLock;
 	return S_OK;
 }

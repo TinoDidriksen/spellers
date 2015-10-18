@@ -18,8 +18,8 @@
 */
 
 #pragma once
-#ifndef DLL_HPP_e32d249d_a80d_4cb2_b414_7a61f946815b
-#define DLL_HPP_e32d249d_a80d_4cb2_b414_7a61f946815b
+#ifndef SERVICE_HPP_e32d249d_a80d_4cb2_b414_7a61f946815b
+#define SERVICE_HPP_e32d249d_a80d_4cb2_b414_7a61f946815b
 
 #include <string>
 #include <map>
@@ -29,9 +29,6 @@
 #include <COM.hpp>
 
 extern std::map<std::string, std::string> conf;
-extern std::vector<std::wstring> locales;
 extern GUID IID_Guid;
-extern size_t refs;
-extern size_t locks;
 
 #endif

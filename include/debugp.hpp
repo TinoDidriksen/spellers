@@ -25,6 +25,8 @@
 #include <string>
 
 #ifndef NDEBUG
+#undef debugp
+#undef p
 extern std::ofstream debug;
 extern thread_local size_t debugd;
 struct debugp {
@@ -74,6 +76,8 @@ struct debugp {
 	}
 };
 #else
+	#undef debugp
+	#undef p
 	#define debugp
 	#define p
 #endif

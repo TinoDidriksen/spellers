@@ -20,6 +20,7 @@
 #include "SpellerFactory.hpp"
 #include "DLL.hpp"
 #include "EnumString.hpp"
+#include <COM.hpp>
 #include <debugp.hpp>
 
 const IID IID_ISpellCheckProviderFactory = { 0x9F671E11, 0x77D6, 0x4C92, { 0xAE, 0xFB, 0x61, 0x52, 0x15, 0xE3, 0xA4, 0xBE } };

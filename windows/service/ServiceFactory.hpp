@@ -18,20 +18,22 @@
 */
 
 #pragma once
-#ifndef DLL_HPP_e32d249d_a80d_4cb2_b414_7a61f946815b
-#define DLL_HPP_e32d249d_a80d_4cb2_b414_7a61f946815b
+#ifndef SERVICEFACTORY_HPP_e32d249d_a80d_4cb2_b414_7a61f946815b
+#define SERVICEFACTORY_HPP_e32d249d_a80d_4cb2_b414_7a61f946815b
 
-#include <string>
-#include <map>
-#include <vector>
-#include <memory>
-#include <cctype>
-#include <COM.hpp>
+#include <Unknwn.h>
 
-extern std::map<std::string, std::string> conf;
-extern std::vector<std::wstring> locales;
-extern GUID IID_Guid;
-extern size_t refs;
-extern size_t locks;
+class ServiceFactory : public IClassFactory {
+public:
+	HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, _COM_Outptr_ void **ppvObject);
+	ULONG STDMETHODCALLTYPE AddRef();
+	ULONG STDMETHODCALLTYPE Release();
+
+	HRESULT STDMETHODCALLTYPE CreateInstance(IUnknown *pUnkOuter, REFIID riid, _COM_Outptr_ void **ppvObject);
+	HRESULT STDMETHODCALLTYPE LockServer(BOOL fLock);
+
+private:
+	ULONG refcount = 1;
+};
 
 #endif

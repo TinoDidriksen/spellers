@@ -17,9 +17,11 @@
 * along with Spellers.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <COM.hpp>
 #include <shared.hpp>
 #include <debugp.hpp>
 #include <shellapi.h>
+#include <objbase.h>
 #include <cwchar>
 
 #ifndef NDEBUG
@@ -34,6 +36,37 @@ int main() {
 	read_conf(conf);
 
 	std::string cbuffer = "7 illlu\n";
+
+	HRESULT hr = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
+	if (SUCCEEDED(hr)) {
+		hr = CoInitializeSecurity(0, -1, 0, 0, RPC_C_AUTHN_NONE, RPC_C_IMP_LEVEL_IDENTIFY, 0, EOAC_NONE, 0);
+		if (FAILED(hr)) {
+			p("CoInitializeSecurity failed", hr);
+		}
+		IUnknown* backend = nullptr;
+		GUID svc = String_to_UUID(conf["UUID"], UUID_SERVICE);
+		hr = CoCreateInstance(svc, nullptr, CLSCTX_LOCAL_SERVER, IID_PPV_ARGS(&backend));
+		if (SUCCEEDED(hr)) {
+			p("backend created", hr);
+		}
+		else {
+			p("backend failed", hr);
+		}
+		if (backend) {
+			backend->Release();
+		}
+	}
+	else {
+		p("CoInitializeEx failed", hr);
+	}
+
+	MSG msg;
+	while (GetMessage(&msg, NULL, 0, 0) > 0) {
+		TranslateMessage(&msg);
+		DispatchMessage(&msg);
+	}
+
+	CoUninitialize();
 
 	HANDLE pipe = CreateFileA(conf["PIPE"].c_str(), GENERIC_READ | FILE_WRITE_DATA, 0, nullptr, OPEN_EXISTING, 0, nullptr);
 

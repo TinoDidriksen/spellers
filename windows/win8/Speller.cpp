@@ -157,11 +157,15 @@ IFACEMETHODIMP Speller::Suggest(_In_ PCWSTR word, _COM_Outptr_ IEnumString** val
 
 IFACEMETHODIMP Speller::GetOptionValue(_In_ PCWSTR optionId, _Out_ BYTE* value) {
 	debugp p(__FUNCTION__);
+	(void)optionId;
+	(void)value;
 	return E_INVALIDARG;
 }
 
 IFACEMETHODIMP Speller::SetOptionValue(_In_ PCWSTR optionId, BYTE value) {
 	debugp p(__FUNCTION__);
+	(void)optionId;
+	(void)value;
 	return E_INVALIDARG;
 }
 
@@ -185,6 +189,7 @@ IFACEMETHODIMP Speller::InitializeWordlist(WORDLIST_TYPE wordlistType, _In_ IEnu
 
 IFACEMETHODIMP Speller::GetOptionDescription(_In_ PCWSTR optionId, _COM_Outptr_ IOptionDescription** value) {
 	debugp p(__FUNCTION__);
+	(void)optionId;
 	*value = nullptr;
 	return E_INVALIDARG;
 }
@@ -198,6 +203,20 @@ bool Speller::checkValidWord(const std::wstring& word, size_t suggs) {
 	}
 	if (invalid_words.find(word) != invalid_words.end()) {
 		return false;
+	}
+
+	IUnknown* backend = nullptr;
+	GUID svc = IID_Guid;
+	svc.Data4[7] += UUID_SERVICE;
+	HRESULT hr = CoCreateInstance(svc, nullptr, CLSCTX_LOCAL_SERVER, IID_PPV_ARGS(&backend));
+	if (SUCCEEDED(hr)) {
+		p("backend created", hr);
+	}
+	else {
+		p("backend failed", hr);
+	}
+	if (backend) {
+		backend->Release();
 	}
 
 	cbuffer.resize(std::numeric_limits<size_t>::digits10 + 2);

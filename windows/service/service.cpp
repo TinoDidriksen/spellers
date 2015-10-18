@@ -27,7 +27,11 @@
 #include <unordered_set>
 #include <memory>
 #include <windows.h>
+#include <objbase.h>
 #include <sddl.h>
+#undef NDEBUG
+#include "ServiceFactory.hpp"
+#include <COM.hpp>
 #include <shared.hpp>
 #include <debugp.hpp>
 
@@ -43,6 +47,7 @@ HANDLE g_hChildStd_OUT_Wr = 0;
 
 std::map<std::string, std::string> conf;
 std::string cbuffer;
+GUID IID_Guid = {};
 
 int hfst_init() {
 	debugp p(__FUNCTION__);
@@ -182,6 +187,24 @@ DWORD WINAPI service_handler(LPVOID) {
 	sa.lpSecurityDescriptor = psd;
 	sa.bInheritHandle = FALSE;
 
+	DWORD sf_reg = 0;
+	HRESULT hr = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
+	std::unique_ptr<ServiceFactory> sf;
+	if (SUCCEEDED(hr)) {
+		hr = CoInitializeSecurity(0, -1, 0, 0, RPC_C_AUTHN_NONE, RPC_C_IMP_LEVEL_IDENTIFY, 0, EOAC_NONE, 0);
+		if (FAILED(hr)) {
+			p("CoInitializeSecurity failed", hr);
+		}
+		sf.reset(new ServiceFactory);
+		hr = CoRegisterClassObject(IID_Guid, static_cast<IClassFactory*>(sf.get()), CLSCTX_LOCAL_SERVER, REGCLS_MULTIPLEUSE, &sf_reg);
+		if (FAILED(hr)) {
+			p("CoRegisterClassObject failed");
+		}
+	}
+	else {
+		p("CoInitializeEx failed");
+	}
+
 	while (WaitForSingleObject(g_svcEvent, 0) != WAIT_OBJECT_0) {
 		HANDLE pipe = CreateNamedPipeA(conf["PIPE"].c_str(), PIPE_ACCESS_DUPLEX, PIPE_WAIT, 1, 1024, 1024, 7 * 1000, &sa);
 		std::unique_ptr<std::remove_pointer<HANDLE>::type, decltype(&CloseHandle)> pipe_cleaner(pipe, &CloseHandle);
@@ -248,6 +271,7 @@ DWORD WINAPI service_handler(LPVOID) {
 		}
 	}
 
+	CoUninitialize();
 	hfst_terminate();
 	return ERROR_SUCCESS;
 }
@@ -313,17 +337,51 @@ void WINAPI service_main(DWORD, LPSTR*) {
 	}
 }
 
-int main() {
+int main(int argc, char *argv[]) {
+	std::vector<std::string> args(argv, argv+argc);
 	debugp p(__FUNCTION__);
 
 	if (!read_conf(conf)) {
 		return -__LINE__;
 	}
 
+	IID_Guid = String_to_UUID(conf["UUID"], UUID_SERVICE);
+	p(UUID_to_String(IID_Guid));
+
+	if (args[1] == "--debug") {
+		DWORD sf_reg = 0;
+		HRESULT hr = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
+		std::unique_ptr<ServiceFactory> sf;
+		if (SUCCEEDED(hr)) {
+			hr = CoInitializeSecurity(0, -1, 0, 0, RPC_C_AUTHN_NONE, RPC_C_IMP_LEVEL_IDENTIFY, 0, EOAC_NONE, 0);
+			if (FAILED(hr)) {
+				p("CoInitializeSecurity failed", hr);
+			}
+			sf.reset(new ServiceFactory);
+			hr = CoRegisterClassObject(IID_Guid, static_cast<IClassFactory*>(sf.get()), CLSCTX_LOCAL_SERVER, REGCLS_MULTIPLEUSE, &sf_reg);
+			if (FAILED(hr)) {
+				p("CoRegisterClassObject failed", hr);
+			}
+		}
+		else {
+			p("CoInitializeEx failed", hr);
+		}
+
+		MSG msg;
+		while (GetMessage(&msg, NULL, 0, 0) > 0) {
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+		}
+
+		CoUninitialize();
+		return 0;
+	}
+
 	SERVICE_TABLE_ENTRYA svc_table[] = {
 		{ const_cast<char*>(conf["SERVICE_NAME"].c_str()), (LPSERVICE_MAIN_FUNCTIONA)service_main },
 		{ nullptr, nullptr }
 	};
+	p(".");
 
 	if (StartServiceCtrlDispatcherA(svc_table) == FALSE) {
 		p("StartServiceCtrlDispatcher failed", GetLastError());

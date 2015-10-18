@@ -48,19 +48,7 @@ bool read_conf() {
 		return false;
 	}
 
-	GUID uuid;
-	uuid.Data1 = strtoul(conf["UUID"].c_str(), 0, 16);
-	uuid.Data2 = static_cast<uint16_t>(strtoul(conf["UUID"].c_str() + 9, 0, 16));
-	uuid.Data3 = static_cast<uint16_t>(strtoul(conf["UUID"].c_str() + 14, 0, 16));
-
-	std::string bytes = conf["UUID"].substr(19);
-	std::remove(bytes.begin(), bytes.end(), '-');
-	for (size_t i = 0; i < sizeof(uuid.Data4); ++i) {
-		char bs[] = {bytes[i*2], bytes[i*2+1], 0};
-		uuid.Data4[i] = static_cast<uint8_t>(strtoul(bs, 0, 16));
-	}
-
-	IID_Guid = uuid;
+	IID_Guid = String_to_UUID(conf["UUID"]);
 
 	std::istringstream ss(conf["LOCALES"]);
 	std::string locale;

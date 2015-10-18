@@ -25,6 +25,8 @@
 #include <string>
 #include <map>
 #include <cctype>
+#include <algorithm>
+#include <cstdint>
 #include <debugp.hpp>
 
 #ifdef _WIN32
@@ -35,9 +37,15 @@
 	#include <cstdio>
 #endif
 
+enum : uint8_t {
+	UUID_SHARED = 0,
+	UUID_SERVICE,
+	NUM_UUIDS
+};
+
 inline std::string trim(std::string str) {
 	while (!str.empty() && (str.back() == 0 || std::isspace(str.back()))) {
-		str.resize(str.size() - 1);
+		str.pop_back();
 	}
 	while (!str.empty() && std::isspace(str[0])) {
 		str.erase(str.begin());

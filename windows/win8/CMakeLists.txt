@@ -15,6 +15,7 @@ add_library(speller-win8 SHARED
 	EnumString.hpp
 	Speller.hpp
 	SpellerFactory.hpp
+	${CMAKE_SOURCE_DIR}/include/COM.hpp
 	${CMAKE_SOURCE_DIR}/include/debugp.hpp
 	${CMAKE_SOURCE_DIR}/include/shared.hpp
 
