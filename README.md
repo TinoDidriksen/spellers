@@ -1,2 +1,5 @@
-# Known Bugs
-- Multi-word expressions are tested in parts only, and thus failing
+# Other Sources
+- https://victorio.uit.no/langtech/trunk/langs/
+- https://svn.code.sf.net/p/apertium/svn/languages/
+- https://svn.code.sf.net/p/hfst/code/trunk/hfst-ospell/ specifically office.cpp
+- https://svn.code.sf.net/p/apertium/svn/branches/packaging/
