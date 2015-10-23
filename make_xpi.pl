@@ -63,6 +63,9 @@ close FILE;
 my @locales = split / /, $conf{'LOCALES'};
 $conf{'LOCALES_JSON'} = "['".join("', '", @locales)."']";
 
+$conf{'LOCALE_LC'} = lc($locales[0]);
+$conf{'LOCALE_LC'} =~ s/[^a-z0-9]/_/g;
+
 # Yields versions such as 2015.101.755 for timestamp 2015-04-11 12:35:00 UTC
 my $h = `date -u '+\%H'`;
 my $m = `date -u '+\%M'`;

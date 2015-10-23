@@ -1,4 +1,4 @@
 component {{UUID1}} components/speller.js
-contract @tinodidriksen.com/speller;1 {{UUID1}}
-category spell-check-engine @tinodidriksen.com/speller;1 speller
+contract @{LOCALE_LC}/speller;1 {{UUID1}}
+category spell-check-engine @{LOCALE_LC}/speller;1 speller
 {SKIN}

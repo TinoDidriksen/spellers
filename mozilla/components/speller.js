@@ -13,7 +13,7 @@
  *   GNU General Public License for more details.
  *
  *   You should have received a copy of the GNU General Public License
- *   along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ *   along with {NAME}.  If not, see <http://www.gnu.org/licenses/>.
  *
  * ***** END OF LICENSE BLOCK ***** */
 Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
@@ -22,7 +22,7 @@ Components.utils.import("resource://gre/modules/ctypes.jsm");
 const mozISpellCheckingEngine = Components.interfaces.mozISpellCheckingEngine;
 const CLASS_ID = Components.ID("{UUID1}");
 const CLASS_NAME = "Spell checker for {LOCALES}";
-const CONTRACT_ID = "@tinodidriksen.com/speller;1";
+const CONTRACT_ID = "@{LOCALE_LC}/speller;1";
 const MAX_SUGGS = 50;
 
 function Shim() {
