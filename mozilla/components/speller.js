@@ -173,7 +173,7 @@ Speller.prototype = {
     set dictionary(dict) {
     	this.current_loc = null;
     	for (var i=0 ; i<this.locales.length ; ++i) {
-    		if (dict === this.locales[0]) {
+    		if (dict === this.locales[i]) {
     			this.current_loc = dict;
     			return;
     		}
