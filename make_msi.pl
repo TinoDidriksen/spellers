@@ -118,4 +118,5 @@ chdir $dir;
 print `find . -type f -name '*.exe' -or -name '*.dll' | xargs -rn1 /opt/mxe/usr/bin/i686-w64-mingw32.shared-strip`;
 print `rm -fv *.msi`;
 print `wixl -v '$ARGV[0].wxs'`;
-print `mv -v '$ARGV[0].msi' '$ARGV[0]-$ver_dot.msi'`;
+print `osslsigncode -pkcs12 '/root/.keys/2015-11-23 TDC Code Signing.p12' -readpass '/root/.keys/2015-11-23 TDC Code Signing.key' -t http://timestamp.verisign.com/scripts/timstamp.dll -in '$ARGV[0].msi' -out '$ARGV[0]-$ver_dot.msi'`;
+print `rm -fv '$ARGV[0].msi'`;
