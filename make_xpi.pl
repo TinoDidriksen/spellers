@@ -66,12 +66,10 @@ $conf{'LOCALES_JSON'} = "['".join("', '", @locales)."']";
 $conf{'LOCALE_LC'} = lc($locales[0]);
 $conf{'LOCALE_LC'} =~ s/[^a-z0-9]/_/g;
 
-# Yields versions such as 2015.101.755 for timestamp 2015-04-11 12:35:00 UTC
-my $h = `date -u '+\%H'`;
-my $m = `date -u '+\%M'`;
-$conf{'VERSION_DOT'} = `date -u '+\%Y.\%j.'`;
-chomp($conf{'VERSION_DOT'});
-$conf{'VERSION_DOT'} .= ($h*60 + $m);
+# Yields versions such as 86.114.29319 for timestamp 1450340999
+my $t = time();
+my ($ma,$mi,$pa) = ( (($t >> 24) & 0xFF), (($t >> 16) & 0xFF), ($t & 0xFFFF) );
+$conf{'VERSION_DOT'} = sprintf('%u.%u.%u', $ma, $mi, $pa);
 $conf{'VERSION_COMMA'} = $conf{'VERSION_DOT'};
 $conf{'VERSION_COMMA'} =~ s/\./,/g;
 

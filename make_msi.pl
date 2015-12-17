@@ -25,12 +25,10 @@ foreach my $f (($wxs, $ini)) {
    }
 }
 
-# Yields versions such as 2015.101.755 for timestamp 2015-04-11 12:35:00 UTC
-my $h = `date -u '+\%H'`;
-my $m = `date -u '+\%M'`;
-my $ver_dot = `date -u '+\%Y.\%j.'`;
-chomp($ver_dot);
-$ver_dot .= ($h*60 + $m);
+# Yields versions such as 86.114.29319 for timestamp 1450340999
+my $t = time();
+my ($ma,$mi,$pa) = ( (($t >> 24) & 0xFF), (($t >> 16) & 0xFF), ($t & 0xFFFF) );
+my $ver_dot = sprintf('%u.%u.%u', $ma, $mi, $pa);
 my $ver_comma = $ver_dot;
 $ver_comma =~ s/\./,/g;
 
