@@ -91,6 +91,9 @@ foreach my $f (glob("$dir/backend/*")) {
    $backend .= "              <File Id='Backend_$id' Name='$base' DiskId='1' Source='$f' />\n";
 }
 $backend =~ s@ />@ KeyPath='yes' />@;
+if ($backend !~ m@\.zhfst@) {
+   die "Backend did not contain a ZHFST file!\n";
+}
 $wxs =~ s/{BACKEND_FILES}\n?/$backend/g;
 
 my $lregs = '';
