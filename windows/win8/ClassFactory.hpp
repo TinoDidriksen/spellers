@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2015, Tino Didriksen <mail@tinodidriksen.com>
+* Copyright (C) 2015-2016, Tino Didriksen <mail@tinodidriksen.com>
 *
 * This file is part of Spellers
 *
