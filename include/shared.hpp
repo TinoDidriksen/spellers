@@ -21,6 +21,17 @@
 #ifndef SHARED_HPP_e32d249d_a80d_4cb2_b414_7a61f946815b
 #define SHARED_HPP_e32d249d_a80d_4cb2_b414_7a61f946815b
 
+#ifdef _MSC_VER
+	// warning C4512: assignment operator could not be generated
+	#pragma warning (disable: 4512)
+	// warning C4456: declaration hides previous local declaration
+	#pragma warning (disable: 4456)
+	// warning C4458: declaration hides class member
+	#pragma warning (disable: 4458)
+	// warning C4459: declaration hides global declaration
+	#pragma warning (disable: 4459)
+#endif
+
 #include <fstream>
 #include <string>
 #include <map>
@@ -36,12 +47,6 @@
 	#include <dlfcn.h>
 	#include <cstdio>
 #endif
-
-enum : uint8_t {
-	UUID_SHARED = 0,
-	UUID_SERVICE,
-	NUM_UUIDS
-};
 
 inline std::string trim(std::string str) {
 	while (!str.empty() && (str.back() == 0 || std::isspace(str.back()))) {

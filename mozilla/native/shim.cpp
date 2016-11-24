@@ -114,7 +114,7 @@ bool checkValidWord(const std::string& word, size_t suggs = 0) {
 
 #ifdef _WIN32
 	DWORD bytes = 0, bytes_read = 0;
-	if (!WriteFile(g_hChildStd_IN_Wr, cbuffer.c_str(), cbuffer.size(), &bytes, 0) || bytes != cbuffer.size()) {
+	if (!WriteFile(g_hChildStd_IN_Wr, cbuffer.c_str(), static_cast<DWORD>(cbuffer.size()), &bytes, 0) || bytes != cbuffer.size()) {
 		showLastError("checkValidWord WriteFile");
 		return false;
 	}

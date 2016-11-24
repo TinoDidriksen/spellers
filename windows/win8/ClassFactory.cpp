@@ -75,5 +75,6 @@ HRESULT STDMETHODCALLTYPE ClassFactory::CreateInstance(IUnknown *pUnkOuter, REFI
 }
 
 HRESULT STDMETHODCALLTYPE ClassFactory::LockServer(BOOL fLock) {
+	(void)fLock;
 	return S_OK;
 }

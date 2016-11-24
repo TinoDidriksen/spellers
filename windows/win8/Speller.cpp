@@ -32,7 +32,6 @@ locale(std::move(locale_))
 {
 	debugp p(__FUNCTION__);
 	p(locale);
-
 }
 
 Speller::~Speller() {
@@ -205,25 +204,11 @@ bool Speller::checkValidWord(const std::wstring& word, size_t suggs) {
 		return false;
 	}
 
-	IUnknown* backend = nullptr;
-	GUID svc = IID_Guid;
-	svc.Data4[7] += UUID_SERVICE;
-	HRESULT hr = CoCreateInstance(svc, nullptr, CLSCTX_LOCAL_SERVER, IID_PPV_ARGS(&backend));
-	if (SUCCEEDED(hr)) {
-		p("backend created", hr);
-	}
-	else {
-		p("backend failed", hr);
-	}
-	if (backend) {
-		backend->Release();
-	}
-
 	cbuffer.resize(std::numeric_limits<size_t>::digits10 + 2);
 	cbuffer.resize(sprintf(&cbuffer[0], "%llu ", static_cast<unsigned long long>(suggs)));
 	size_t off = cbuffer.size();
 	cbuffer.resize(cbuffer.size() + word.size() * 4);
-	cbuffer.resize(WideCharToMultiByte(CP_UTF8, 0, word.c_str(), word.size(), &cbuffer[off], cbuffer.size() - off, 0, 0) + off);
+	cbuffer.resize(WideCharToMultiByte(CP_UTF8, 0, word.c_str(), static_cast<int>(word.size()), &cbuffer[off], static_cast<int>(cbuffer.size() - off), 0, 0) + off);
 	cbuffer += '\n';
 
 	HANDLE pipe = CreateFileA(conf["PIPE"].c_str(), GENERIC_READ | FILE_WRITE_DATA, 0, nullptr, OPEN_EXISTING, 0, nullptr);
@@ -236,7 +221,7 @@ bool Speller::checkValidWord(const std::wstring& word, size_t suggs) {
 	p("Writing pipe", cbuffer);
 	DWORD bytes = 0;
 	DWORD bytes_read = 0;
-	if (!WriteFile(pipe, cbuffer.c_str(), cbuffer.size(), &bytes, 0) || bytes != cbuffer.size()) {
+	if (!WriteFile(pipe, cbuffer.c_str(), static_cast<DWORD>(cbuffer.size()), &bytes, 0) || bytes != cbuffer.size()) {
 		p("WriteFile(pipe)", GetLastError());
 		return false;
 	}
@@ -281,7 +266,7 @@ bool Speller::checkValidWord(const std::wstring& word, size_t suggs) {
 	}
 
 	wbuffer.resize(cbuffer.size() * 2);
-	wbuffer.resize(MultiByteToWideChar(CP_UTF8, 0, cbuffer.c_str(), cbuffer.size(), &wbuffer[0], wbuffer.size()));
+	wbuffer.resize(MultiByteToWideChar(CP_UTF8, 0, cbuffer.c_str(), static_cast<int>(cbuffer.size()), &wbuffer[0], static_cast<int>(wbuffer.size())));
 
 	size_t e = wbuffer.find(L"\t");
 	if (e == std::wstring::npos) {
