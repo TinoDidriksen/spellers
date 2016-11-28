@@ -25,13 +25,35 @@
 #include <shellapi.h>
 #include <cwchar>
 
-const IID IID_ISpellCheckProvider = { 0x0C58F8DE, 0x8E94, 0x479E, { 0x97, 0x17, 0x70, 0xC4, 0x2C, 0x4A, 0xD2, 0xC3 } };
+const IID IID_ISpellCheckProviderFactory = { 0x9F671E11, 0x77D6, 0x4C92,{ 0xAE, 0xFB, 0x61, 0x52, 0x15, 0xE3, 0xA4, 0xBE } };
+const IID IID_ISpellCheckProvider = { 0x0C58F8DE, 0x8E94, 0x479E,{ 0x97, 0x17, 0x70, 0xC4, 0x2C, 0x4A, 0xD2, 0xC3 } };
+const IID IID_ISpellingError = { 0xB7C82D61, 0xFBE8, 0x4B47,{ 0x9B, 0x27, 0x6C, 0x0D, 0x2E, 0x0D, 0xE0, 0xA3 } };
+const IID IID_IEnumSpellingError = { 0x803E3BD4, 0x2828, 0x4410,{ 0x82, 0x90, 0x41, 0x8D, 0x1D, 0x73, 0xC7, 0x62 } };
 
-Speller::Speller(std::wstring locale_) :
-locale(std::move(locale_))
+Speller::Speller(std::wstring locale_)
+	: locale(std::move(locale_))
 {
 	debugp p(__FUNCTION__);
 	p(locale);
+
+	std::string engine = conf["PATH"] + conf["ENGINE"].substr(conf["ENGINE"].find(' ') + 1);
+	p(engine);
+	try {
+		speller.read_zhfst(engine);
+		speller.set_time_cutoff(6.0);
+	}
+	catch (hfst_ol::ZHfstMetaDataParsingError ex) {
+		p("ZHfstMetaDataParsingError:", ex.what());
+		throw -1;
+	}
+	catch (hfst_ol::ZHfstZipReadingError ex) {
+		p("ZHfstZipReadingError:", ex.what());
+		throw -1;
+	}
+	catch (hfst_ol::ZHfstXmlParsingError ex) {
+		p("ZHfstXmlParsingError:", ex.what());
+		throw -1;
+	}
 }
 
 Speller::~Speller() {
@@ -110,7 +132,7 @@ IFACEMETHODIMP Speller::Check(_In_ PCWSTR text, _COM_Outptr_ IEnumSpellingError*
 		return E_INVALIDARG;
 	}
 
-	*value = nullptr;
+	std::vector<SpellingError> errors;
 
 	std::wstring wtext(text);
 	p(wtext);
@@ -132,12 +154,14 @@ IFACEMETHODIMP Speller::Check(_In_ PCWSTR text, _COM_Outptr_ IEnumSpellingError*
 			continue;
 		}
 
-		// Store error offsets here
+		errors.emplace_back(SpellingError(b, e - b));
 
 		if (e >= wtext.size()) {
 			break;
 		}
 	}
+
+	*value = com_new<EnumSpellingError>(std::move(errors));
 	return S_OK;
 }
 
@@ -150,7 +174,12 @@ IFACEMETHODIMP Speller::Suggest(_In_ PCWSTR word, _COM_Outptr_ IEnumString** val
 		return E_INVALIDARG;
 	}
 
-	*value = com_new<EnumString>();
+	if (checkValidWord(word, 10)) {
+		*value = com_new<EnumString>(word);
+		return S_FALSE;
+	}
+
+	*value = com_new<EnumString>(invalid_words[word]);
 	return S_OK;
 }
 
@@ -204,51 +233,9 @@ bool Speller::checkValidWord(const std::wstring& word, size_t suggs) {
 		return false;
 	}
 
-	cbuffer.resize(std::numeric_limits<size_t>::digits10 + 2);
-	cbuffer.resize(sprintf(&cbuffer[0], "%llu ", static_cast<unsigned long long>(suggs)));
-	size_t off = cbuffer.size();
-	cbuffer.resize(cbuffer.size() + word.size() * 4);
-	cbuffer.resize(WideCharToMultiByte(CP_UTF8, 0, word.c_str(), static_cast<int>(word.size()), &cbuffer[off], static_cast<int>(cbuffer.size() - off), 0, 0) + off);
-	cbuffer += '\n';
+	w2n(word, cbuffer);
 
-	HANDLE pipe = CreateFileA(conf["PIPE"].c_str(), GENERIC_READ | FILE_WRITE_DATA, 0, nullptr, OPEN_EXISTING, 0, nullptr);
-
-	if (pipe == INVALID_HANDLE_VALUE) {
-		p("CreateFileA failed", GetLastError());
-		return false;
-	}
-
-	p("Writing pipe", cbuffer);
-	DWORD bytes = 0;
-	DWORD bytes_read = 0;
-	if (!WriteFile(pipe, cbuffer.c_str(), static_cast<DWORD>(cbuffer.size()), &bytes, 0) || bytes != cbuffer.size()) {
-		p("WriteFile(pipe)", GetLastError());
-		return false;
-	}
-
-	p("Reading pipe");
-	bytes = 0;
-	bytes_read = 0;
-	cbuffer.resize(1);
-	if (!ReadFile(pipe, &cbuffer[0], 1, &bytes_read, 0) || bytes_read != 1) {
-		p("ReadFile(pipe) 1", GetLastError());
-		return false;
-	}
-	if (!PeekNamedPipe(pipe, 0, 0, 0, &bytes, 0)) {
-		p("PeekNamedPipe(pipe)", GetLastError());
-		return false;
-	}
-	if (bytes) {
-		cbuffer.resize(1 + bytes);
-		if (!ReadFile(pipe, &cbuffer[1], bytes, &bytes_read, 0) || bytes != bytes_read) {
-			p("ReadFile(pipe) 2", GetLastError());
-			return false;
-		}
-	}
-
-	cbuffer = trim(cbuffer);
-
-	if (cbuffer[0] == '*') {
+	if (speller.spell(cbuffer)) {
 		valid_words.insert(word);
 		return true;
 	}
@@ -260,25 +247,20 @@ bool Speller::checkValidWord(const std::wstring& word, size_t suggs) {
 	std::vector<std::wstring>& alts = invalid_words[word];
 	alts.clear();
 
-	// This includes # for no alternatives and ! for error
-	if (cbuffer[0] != '&') {
+	hfst_ol::CorrectionQueue corrections = speller.suggest(cbuffer);
+
+	if (corrections.size() == 0) {
 		return false;
 	}
 
-	wbuffer.resize(cbuffer.size() * 2);
-	wbuffer.resize(MultiByteToWideChar(CP_UTF8, 0, cbuffer.c_str(), static_cast<int>(cbuffer.size()), &wbuffer[0], static_cast<int>(wbuffer.size())));
+	for (size_t i = 0, e = corrections.size() ; i < e && i < suggs ; ++i) {
+		const std::string& narrow = corrections.top().first;
 
-	size_t e = wbuffer.find(L"\t");
-	if (e == std::wstring::npos) {
-		return false;
-	}
+		n2w(narrow, wbuffer);
+		alts.emplace_back(std::move(wbuffer));
 
-	size_t b = e + 1;
-	while ((e = wbuffer.find(L"\t", b)) != std::wstring::npos) {
-		alts.emplace_back(wbuffer.begin() + b, wbuffer.begin() + e);
-		b = e + 1;
+		corrections.pop();
 	}
-	alts.emplace_back(wbuffer.begin() + b, wbuffer.end());
 
 	return false;
 }

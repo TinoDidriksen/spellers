@@ -44,8 +44,13 @@ public:
 		debugp p(__FUNCTION__);
 	}
 
-	EnumString(std::vector<std::wstring> strings) :
-		strings(strings)
+	EnumString(std::wstring word) {
+		debugp p(__FUNCTION__);
+		strings.emplace_back(std::move(word));
+	}
+
+	EnumString(std::vector<std::wstring> strings)
+		: strings(std::move(strings))
 	{
 		debugp p(__FUNCTION__);
 	}
@@ -66,7 +71,7 @@ public:
 		return refcount;
 	}
 
-	STDMETHODIMP QueryInterface(REFIID riid, void **ppvObject) {
+	IFACEMETHODIMP QueryInterface(REFIID riid, void **ppvObject) {
 		//debugp p(__FUNCTION__);
 		if (ppvObject == nullptr) {
 			return E_POINTER;
@@ -84,7 +89,7 @@ public:
 		return hr;
 	}
 
-	STDMETHODIMP Next(ULONG celt, LPOLESTR *rgelt, ULONG *pceltFetched) {
+	IFACEMETHODIMP Next(ULONG celt, LPOLESTR *rgelt, ULONG *pceltFetched) {
 		debugp p(__FUNCTION__);
 		p(celt);
 		HRESULT hr = S_FALSE;
@@ -104,7 +109,7 @@ public:
 		return hr;
 	}
 
-	STDMETHODIMP Skip(ULONG celt) {
+	IFACEMETHODIMP Skip(ULONG celt) {
 		debugp p(__FUNCTION__);
 		p(celt);
 		current += celt;
@@ -116,13 +121,13 @@ public:
 		return S_OK;
 	}
 
-	STDMETHODIMP Reset() {
+	IFACEMETHODIMP Reset() {
 		debugp p(__FUNCTION__);
 		current = 0;
 		return S_OK;
 	}
 
-	STDMETHODIMP Clone(IEnumString **ppenum) {
+	IFACEMETHODIMP Clone(IEnumString **ppenum) {
 		debugp p(__FUNCTION__);
 		EnumString* pnew = new EnumString(strings);
 		pnew->AddRef();
@@ -134,6 +139,131 @@ public:
 private:
 	std::vector<std::wstring> strings;
 	ULONG current = 0;
+	ULONG refcount = 1;
+};
+
+class SpellingError : public ISpellingError {
+public:
+	SpellingError(size_t b, size_t l)
+		: b(static_cast<ULONG>(b))
+		, l(static_cast<ULONG>(l))
+	{
+	}
+
+	STDMETHODIMP_(ULONG) AddRef() {
+		debugp p(__FUNCTION__);
+		return InterlockedIncrement(&refcount);
+	}
+
+	STDMETHODIMP_(ULONG) Release() {
+		debugp p(__FUNCTION__);
+		if (InterlockedDecrement(&refcount) == 0) {
+			p(__LINE__);
+			com_delete(this);
+			return 0;
+		}
+
+		return refcount;
+	}
+
+	IFACEMETHODIMP QueryInterface(REFIID riid, void **ppvObject) {
+		//debugp p(__FUNCTION__);
+		if (ppvObject == nullptr) {
+			return E_POINTER;
+		}
+
+		HRESULT hr = E_NOINTERFACE;
+		*ppvObject = nullptr;
+
+		if (riid == IID_IUnknown || riid == IID_ISpellingError) {
+			*ppvObject = this;
+			AddRef();
+			hr = S_OK;
+		}
+
+		return hr;
+	}
+
+	IFACEMETHODIMP get_CorrectiveAction(CORRECTIVE_ACTION *value) {
+		*value = CORRECTIVE_ACTION_GET_SUGGESTIONS;
+		return S_OK;
+	}
+
+	IFACEMETHODIMP get_Length(ULONG *value) {
+		*value = l;
+		return S_OK;
+	}
+
+	IFACEMETHODIMP get_Replacement(LPWSTR *value) {
+		*value = nullptr;
+		return S_OK;
+	}
+
+	IFACEMETHODIMP get_StartIndex(ULONG *value) {
+		*value = b;
+		return S_OK;
+	}
+
+private:
+	ULONG b, l;
+	ULONG refcount = 1;
+};
+
+class EnumSpellingError : public IEnumSpellingError {
+public:
+	EnumSpellingError(std::vector<SpellingError> errors)
+		: errors(std::move(errors))
+	{
+	}
+
+	STDMETHODIMP_(ULONG) AddRef() {
+		debugp p(__FUNCTION__);
+		return InterlockedIncrement(&refcount);
+	}
+
+	STDMETHODIMP_(ULONG) Release() {
+		debugp p(__FUNCTION__);
+		if (InterlockedDecrement(&refcount) == 0) {
+			p(__LINE__);
+			com_delete(this);
+			return 0;
+		}
+
+		return refcount;
+	}
+
+	IFACEMETHODIMP QueryInterface(REFIID riid, void **ppvObject) {
+		//debugp p(__FUNCTION__);
+		if (ppvObject == nullptr) {
+			return E_POINTER;
+		}
+
+		HRESULT hr = E_NOINTERFACE;
+		*ppvObject = nullptr;
+
+		if (riid == IID_IUnknown || riid == IID_IEnumSpellingError) {
+			*ppvObject = this;
+			AddRef();
+			hr = S_OK;
+		}
+
+		return hr;
+	}
+
+	IFACEMETHODIMP Next(ISpellingError **value) {
+		if (i >= errors.size()) {
+			return S_FALSE;
+		}
+
+		*value = com_new<SpellingError>(errors[i]);
+
+		++i;
+		return S_OK;
+	}
+
+private:
+	std::vector<SpellingError> errors;
+	ULONG i = 0;
 	ULONG refcount = 1;
 };
 

@@ -112,4 +112,16 @@ inline bool read_conf(std::map<std::string,std::string>& conf) {
 	return true;
 }
 
+inline void w2n(const std::wstring& wide, std::string& narrow) {
+	narrow.clear();
+	narrow.resize(wide.size() * 4);
+	narrow.resize(WideCharToMultiByte(CP_UTF8, 0, wide.c_str(), static_cast<int>(wide.size()), &narrow[0], static_cast<int>(narrow.size()), 0, 0));
+}
+
+inline void n2w(const std::string& narrow, std::wstring& wide) {
+	wide.clear();
+	wide.resize(narrow.size() * 2);
+	wide.resize(MultiByteToWideChar(CP_UTF8, 0, narrow.c_str(), static_cast<int>(narrow.size()), &wide[0], static_cast<int>(wide.size())));
+}
+
 #endif

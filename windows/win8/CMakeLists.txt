@@ -4,6 +4,9 @@ add_definitions(-DWINVER=0x0602 -D_WIN32_WINNT=0x0602)
 
 add_definitions(-DDLL_EXPORTS)
 
+include_directories("C:/Cygwin/home/tino/hfst-ospell")
+link_directories("C:/Cygwin/home/tino/hfst-ospell-build/64/Debug")
+
 add_library(speller-win8 SHARED
 	ClassFactory.cpp
 	DLL.cpp
@@ -21,3 +24,22 @@ add_library(speller-win8 SHARED
 
 	Speller.def
 	)
+target_link_libraries(speller-win8 hfstospell)
+
+add_executable(test-speller
+	test-speller.cpp
+	ClassFactory.cpp
+	DLL.cpp
+	Speller.cpp
+	SpellerFactory.cpp
+
+	ClassFactory.hpp
+	DLL.hpp
+	EnumString.hpp
+	Speller.hpp
+	SpellerFactory.hpp
+	${CMAKE_SOURCE_DIR}/include/COM.hpp
+	${CMAKE_SOURCE_DIR}/include/debugp.hpp
+	${CMAKE_SOURCE_DIR}/include/shared.hpp
+	)
+target_link_libraries(test-speller hfstospell)

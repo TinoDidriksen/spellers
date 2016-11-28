@@ -28,6 +28,7 @@
 #include <unordered_map>
 #include <spellcheckprovider.h>
 #include <windows.h>
+#include <ZHfstOspeller.h>
 
 class Speller : public ISpellCheckProvider{
 public:
@@ -52,6 +53,8 @@ public:
 
 private:
 	bool checkValidWord(const std::wstring& word, size_t suggs = 0);
+
+	hfst_ol::ZHfstOspeller speller;
 
 	ULONG refcount = 1;
 	std::wstring locale;
