@@ -89,7 +89,7 @@ ULONG STDMETHODCALLTYPE Speller::Release() {
 	debugp p(__FUNCTION__);
 
 	if (InterlockedDecrement(&refcount) == 0) {
-		p(__LINE__);
+		p("Cleanup", __LINE__);
 		com_delete(this);
 		return 0;
 	}
@@ -224,7 +224,7 @@ IFACEMETHODIMP Speller::GetOptionDescription(_In_ PCWSTR optionId, _COM_Outptr_ 
 
 bool Speller::checkValidWord(const std::wstring& word, size_t suggs) {
 	debugp p("checkValidWord");
-	p(word);
+	p(word, suggs);
 
 	if (valid_words.find(word) != valid_words.end()) {
 		return true;

@@ -59,7 +59,7 @@ ULONG STDMETHODCALLTYPE SpellerFactory::Release() {
 	debugp p(__FUNCTION__);
 
 	if (InterlockedDecrement(&refcount) == 0) {
-		p(__LINE__);
+		p("Cleanup", __LINE__);
 		com_delete(this);
 		return 0;
 	}
@@ -83,7 +83,7 @@ IFACEMETHODIMP SpellerFactory::IsSupported(_In_ PCWSTR languageTag, _Out_ BOOL* 
 	}
 	*value = false;
 
-	for (auto& locale : locales) {
+	for (const auto& locale : locales) {
 		if (CompareStringOrdinal(languageTag, -1, locale.c_str(), -1, true) == CSTR_EQUAL) {
 			*value = true;
 			break;

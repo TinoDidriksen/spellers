@@ -30,7 +30,7 @@
 #include <windows.h>
 #include <ZHfstOspeller.h>
 
-class Speller : public ISpellCheckProvider{
+class Speller : public ISpellCheckProvider {
 public:
 	Speller(std::wstring locale);
 	~Speller();

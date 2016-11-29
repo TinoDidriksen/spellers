@@ -52,6 +52,11 @@ struct debugp {
 		debug << std::string(debugd, '\t') << t << ' ' << u << std::endl;
 	}
 
+	template<typename T, typename U, typename V>
+	void operator()(const T& t, const U& u, const V& v) {
+		debug << std::string(debugd, '\t') << t << ' ' << u << ' ' << v << std::endl;
+	}
+
 	void operator()(const std::wstring& t) {
 		debug << std::string(debugd, '\t');
 		for (size_t i = 0; i<t.size(); ++i) {

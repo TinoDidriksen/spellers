@@ -34,4 +34,14 @@ int main() {
 
 	IEnumString *es;
 	speller.Suggest(L"illlu", &es);
+
+	LPOLESTR str;
+	while (es->Next(1, &str, nullptr) == S_OK) {
+		std::wcout << str << std::endl;
+		CoTaskMemFree(str);
+	}
+
+	es->Release();
+	se->Release();
+	ese->Release();
 }

@@ -31,28 +31,31 @@
 template<typename String>
 inline void CoCopyWString(const String& in, PWSTR* out) {
 	debugp p(__FUNCTION__);
-	p(in);
+	p(in, static_cast<void*>(*out));
 	*out = reinterpret_cast<LPWSTR>(CoTaskMemAlloc(sizeof(wchar_t)*(in.size() + 1)));
 	std::copy(in.begin(), in.end(), *out);
 	(*out)[in.size()] = 0;
-	p(std::wstring(*out));
+	p(std::wstring(*out), static_cast<void*>(*out));
 }
 
 class EnumString : public IEnumString {
 public:
 	EnumString() {
 		debugp p(__FUNCTION__);
+		p(strings.size());
 	}
 
 	EnumString(std::wstring word) {
 		debugp p(__FUNCTION__);
 		strings.emplace_back(std::move(word));
+		p(strings.size());
 	}
 
-	EnumString(std::vector<std::wstring> strings)
-		: strings(std::move(strings))
+	EnumString(std::vector<std::wstring> strings_)
+		: strings(std::move(strings_))
 	{
 		debugp p(__FUNCTION__);
+		p(strings.size());
 	}
 
 	STDMETHODIMP_(ULONG) AddRef() {
@@ -63,7 +66,7 @@ public:
 	STDMETHODIMP_(ULONG) Release() {
 		debugp p(__FUNCTION__);
 		if (InterlockedDecrement(&refcount) == 0) {
-			p(__LINE__);
+			p("Cleanup", __LINE__);
 			com_delete(this);
 			return 0;
 		}
@@ -96,7 +99,9 @@ public:
 
 		ULONG i = 0;
 		for (; i < celt && current < strings.size(); ++i, ++current) {
+			p(i, current);
 			CoCopyWString(strings[current], rgelt+i);
+			p(static_cast<void*>(rgelt + i), static_cast<void*>(rgelt[i]));
 		}
 
 		if (celt > 1) {
@@ -129,7 +134,7 @@ public:
 
 	IFACEMETHODIMP Clone(IEnumString **ppenum) {
 		debugp p(__FUNCTION__);
-		EnumString* pnew = new EnumString(strings);
+		EnumString* pnew = com_new<EnumString>(strings);
 		pnew->AddRef();
 		*ppenum = pnew;
 
@@ -148,6 +153,8 @@ public:
 		: b(static_cast<ULONG>(b))
 		, l(static_cast<ULONG>(l))
 	{
+		debugp p(__FUNCTION__);
+		p(b, l);
 	}
 
 	STDMETHODIMP_(ULONG) AddRef() {
@@ -158,7 +165,7 @@ public:
 	STDMETHODIMP_(ULONG) Release() {
 		debugp p(__FUNCTION__);
 		if (InterlockedDecrement(&refcount) == 0) {
-			p(__LINE__);
+			p("Cleanup", __LINE__);
 			com_delete(this);
 			return 0;
 		}
@@ -185,21 +192,25 @@ public:
 	}
 
 	IFACEMETHODIMP get_CorrectiveAction(CORRECTIVE_ACTION *value) {
+		debugp p(__FUNCTION__);
 		*value = CORRECTIVE_ACTION_GET_SUGGESTIONS;
 		return S_OK;
 	}
 
 	IFACEMETHODIMP get_Length(ULONG *value) {
+		debugp p(__FUNCTION__);
 		*value = l;
 		return S_OK;
 	}
 
 	IFACEMETHODIMP get_Replacement(LPWSTR *value) {
+		debugp p(__FUNCTION__);
 		*value = nullptr;
 		return S_OK;
 	}
 
 	IFACEMETHODIMP get_StartIndex(ULONG *value) {
+		debugp p(__FUNCTION__);
 		*value = b;
 		return S_OK;
 	}
@@ -211,9 +222,11 @@ private:
 
 class EnumSpellingError : public IEnumSpellingError {
 public:
-	EnumSpellingError(std::vector<SpellingError> errors)
-		: errors(std::move(errors))
+	EnumSpellingError(std::vector<SpellingError> errors_)
+		: errors(std::move(errors_))
 	{
+		debugp p(__FUNCTION__);
+		p(errors.size());
 	}
 
 	STDMETHODIMP_(ULONG) AddRef() {
@@ -224,7 +237,7 @@ public:
 	STDMETHODIMP_(ULONG) Release() {
 		debugp p(__FUNCTION__);
 		if (InterlockedDecrement(&refcount) == 0) {
-			p(__LINE__);
+			p("Cleanup", __LINE__);
 			com_delete(this);
 			return 0;
 		}
@@ -251,6 +264,7 @@ public:
 	}
 
 	IFACEMETHODIMP Next(ISpellingError **value) {
+		debugp p(__FUNCTION__);
 		if (i >= errors.size()) {
 			return S_FALSE;
 		}

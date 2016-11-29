@@ -38,7 +38,6 @@
 #include <cctype>
 #include <algorithm>
 #include <cstdint>
-#include <debugp.hpp>
 
 #ifdef _WIN32
 	#include <windows.h>
@@ -47,6 +46,8 @@
 	#include <dlfcn.h>
 	#include <cstdio>
 #endif
+
+#include <debugp.hpp>
 
 inline std::string trim(std::string str) {
 	while (!str.empty() && (str.back() == 0 || std::isspace(str.back()))) {
