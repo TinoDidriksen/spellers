@@ -29,7 +29,7 @@
 #include <debugp.hpp>
 
 template<typename String>
-inline void CoCopyWString(const String& in, PWSTR* out) {
+inline void CoCopyWString(const String& in, _COM_Outptr_ PWSTR* out) {
 	debugp p(__FUNCTION__);
 	p(in, static_cast<void*>(*out));
 	*out = reinterpret_cast<LPWSTR>(CoTaskMemAlloc(sizeof(wchar_t)*(in.size() + 1)));
@@ -74,7 +74,7 @@ public:
 		return refcount;
 	}
 
-	IFACEMETHODIMP QueryInterface(REFIID riid, void **ppvObject) {
+	IFACEMETHODIMP QueryInterface(REFIID riid, _COM_Outptr_ void **ppvObject) {
 		//debugp p(__FUNCTION__);
 		if (ppvObject == nullptr) {
 			return E_POINTER;
@@ -92,7 +92,7 @@ public:
 		return hr;
 	}
 
-	IFACEMETHODIMP Next(ULONG celt, LPOLESTR *rgelt, ULONG *pceltFetched) {
+	IFACEMETHODIMP Next(ULONG celt, _COM_Outptr_ LPOLESTR *rgelt, _Out_ ULONG *pceltFetched) {
 		debugp p(__FUNCTION__);
 		p(celt);
 		HRESULT hr = S_FALSE;
@@ -104,7 +104,7 @@ public:
 			p(static_cast<void*>(rgelt + i), static_cast<void*>(rgelt[i]));
 		}
 
-		if (celt > 1) {
+		if (pceltFetched) {
 			*pceltFetched = i;
 		}
 		if (i == celt) {
@@ -132,7 +132,7 @@ public:
 		return S_OK;
 	}
 
-	IFACEMETHODIMP Clone(IEnumString **ppenum) {
+	IFACEMETHODIMP Clone(_COM_Outptr_ IEnumString **ppenum) {
 		debugp p(__FUNCTION__);
 		EnumString* pnew = com_new<EnumString>(strings);
 		pnew->AddRef();
@@ -191,25 +191,26 @@ public:
 		return hr;
 	}
 
-	IFACEMETHODIMP get_CorrectiveAction(CORRECTIVE_ACTION *value) {
+	IFACEMETHODIMP get_CorrectiveAction(_Out_ CORRECTIVE_ACTION *value) {
 		debugp p(__FUNCTION__);
 		*value = CORRECTIVE_ACTION_GET_SUGGESTIONS;
+		p(*value);
 		return S_OK;
 	}
 
-	IFACEMETHODIMP get_Length(ULONG *value) {
+	IFACEMETHODIMP get_Length(_Out_ ULONG *value) {
 		debugp p(__FUNCTION__);
 		*value = l;
 		return S_OK;
 	}
 
-	IFACEMETHODIMP get_Replacement(LPWSTR *value) {
+	IFACEMETHODIMP get_Replacement(_Out_ LPWSTR *value) {
 		debugp p(__FUNCTION__);
 		*value = nullptr;
 		return S_OK;
 	}
 
-	IFACEMETHODIMP get_StartIndex(ULONG *value) {
+	IFACEMETHODIMP get_StartIndex(_Out_ ULONG *value) {
 		debugp p(__FUNCTION__);
 		*value = b;
 		return S_OK;
@@ -245,7 +246,7 @@ public:
 		return refcount;
 	}
 
-	IFACEMETHODIMP QueryInterface(REFIID riid, void **ppvObject) {
+	IFACEMETHODIMP QueryInterface(REFIID riid, _COM_Outptr_ void **ppvObject) {
 		//debugp p(__FUNCTION__);
 		if (ppvObject == nullptr) {
 			return E_POINTER;
@@ -263,7 +264,7 @@ public:
 		return hr;
 	}
 
-	IFACEMETHODIMP Next(ISpellingError **value) {
+	IFACEMETHODIMP Next(_COM_Outptr_ ISpellingError **value) {
 		debugp p(__FUNCTION__);
 		if (i >= errors.size()) {
 			return S_FALSE;
