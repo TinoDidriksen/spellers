@@ -38,11 +38,14 @@
 #include <cctype>
 #include <algorithm>
 #include <cstdint>
+#include <utf8.h>
 
 #ifdef _WIN32
 	#include <windows.h>
 #else
-	#define _GNU_SOURCE
+	#ifndef _GNU_SOURCE
+		#define _GNU_SOURCE
+	#endif
 	#include <dlfcn.h>
 	#include <cstdio>
 #endif
@@ -115,14 +118,20 @@ inline bool read_conf(std::map<std::string,std::string>& conf) {
 
 inline void w2n(const std::wstring& wide, std::string& narrow) {
 	narrow.clear();
-	narrow.resize(wide.size() * 4);
-	narrow.resize(WideCharToMultiByte(CP_UTF8, 0, wide.c_str(), static_cast<int>(wide.size()), &narrow[0], static_cast<int>(narrow.size()), 0, 0));
+#ifdef _WIN32
+	utf8::utf16to8(wide.begin(), wide.end(), std::back_inserter(narrow));
+#else
+	utf8::utf32to8(wide.begin(), wide.end(), std::back_inserter(narrow));
+#endif
 }
 
 inline void n2w(const std::string& narrow, std::wstring& wide) {
 	wide.clear();
-	wide.resize(narrow.size() * 2);
-	wide.resize(MultiByteToWideChar(CP_UTF8, 0, narrow.c_str(), static_cast<int>(narrow.size()), &wide[0], static_cast<int>(wide.size())));
+#ifdef _WIN32
+	utf8::utf8to16(narrow.begin(), narrow.end(), std::back_inserter(wide));
+#else
+	utf8::utf8to32(narrow.begin(), narrow.end(), std::back_inserter(wide));
+#endif
 }
 
 #endif

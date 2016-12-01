@@ -4,9 +4,6 @@ add_definitions(-DWINVER=0x0602 -D_WIN32_WINNT=0x0602)
 
 add_definitions(-DDLL_EXPORTS)
 
-include_directories("C:/Cygwin/home/tino/hfst-ospell")
-link_directories("C:/Cygwin/home/tino/hfst-ospell-build/64/Debug")
-
 add_library(speller-win8 SHARED
 	ClassFactory.cpp
 	DLL.cpp

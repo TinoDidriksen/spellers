@@ -37,7 +37,6 @@
 		#define SPELLER_API __declspec(dllimport)
 	#endif
 #else
-	#define _GNU_SOURCE
 	#include <dlfcn.h>
 	#include <unistd.h>
 	#include <popen_plus.h>
