@@ -52,10 +52,14 @@ endif()
 
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include")
 
-include(FindPkgConfig)
-pkg_check_modules(HFSTOSPELL REQUIRED hfstospell)
-link_directories(${HFSTOSPELL_LIBRARY_DIRS})
-include_directories(${HFSTOSPELL_INCLUDE_DIRS})
+if(MSVC)
+	# ToDo: How should VC++ find hfst-ospell?
+else()
+	include(FindPkgConfig)
+	pkg_check_modules(HFSTOSPELL REQUIRED hfstospell)
+	link_directories(${HFSTOSPELL_LIBRARY_DIRS})
+	include_directories(${HFSTOSPELL_INCLUDE_DIRS})
+endif()
 
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/msoffice")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/mozilla/native")
