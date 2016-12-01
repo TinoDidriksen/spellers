@@ -22,7 +22,7 @@
 #include <COM.hpp>
 #include <debugp.hpp>
 
-HRESULT STDMETHODCALLTYPE ServiceFactory::QueryInterface(REFIID riid, _COM_Outptr_ void **ppvObject) {
+HRESULT STDMETHODCALLTYPE ServiceFactory::QueryInterface(REFIID riid, void **ppvObject) {
 	debugp p(__FUNCTION__);
 	p(UUID_to_String(riid));
 	if (ppvObject == nullptr) {
@@ -53,7 +53,7 @@ ULONG STDMETHODCALLTYPE ServiceFactory::Release() {
 	return refcount;
 }
 
-HRESULT STDMETHODCALLTYPE ServiceFactory::CreateInstance(IUnknown *pUnkOuter, REFIID riid, _COM_Outptr_ void **ppvObject) {
+HRESULT STDMETHODCALLTYPE ServiceFactory::CreateInstance(IUnknown *pUnkOuter, REFIID riid, void **ppvObject) {
 	debugp p(__FUNCTION__);
 	p(UUID_to_String(riid));
 	if (pUnkOuter) {

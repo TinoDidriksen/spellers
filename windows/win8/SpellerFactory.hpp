@@ -34,14 +34,14 @@ class SpellerFactory : public ISpellCheckProviderFactory {
 public:
 	~SpellerFactory();
 
-	HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, _COM_Outptr_ void **ppvObject);
+	HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void **ppvObject);
 	ULONG STDMETHODCALLTYPE AddRef();
 	ULONG STDMETHODCALLTYPE Release();
 
 	IFACEMETHOD(IsSupported)(_In_ PCWSTR languageTag, _Out_ BOOL* value);
-	IFACEMETHOD(CreateSpellCheckProvider)(_In_ PCWSTR languageTag, _COM_Outptr_ ISpellCheckProvider** value);
+	IFACEMETHOD(CreateSpellCheckProvider)(_In_ PCWSTR languageTag, ISpellCheckProvider** value);
 
-	IFACEMETHOD(get_SupportedLanguages)(_COM_Outptr_ IEnumString** value);
+	IFACEMETHOD(get_SupportedLanguages)(IEnumString** value);
 private:
 	ULONG refcount = 1;
 	std::map<std::wstring, Speller*> spellers;

@@ -22,15 +22,15 @@
 #define CLASSFACTORY_HPP_e32d249d_a80d_4cb2_b414_7a61f946815b
 
 #include "DLL.hpp"
-#include <Unknwn.h>
+#include <unknwn.h>
 
 class ClassFactory : public IClassFactory {
 public:
-	HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, _COM_Outptr_ void **ppvObject);
+	HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void **ppvObject);
 	ULONG STDMETHODCALLTYPE AddRef();
 	ULONG STDMETHODCALLTYPE Release();
 
-	HRESULT STDMETHODCALLTYPE CreateInstance(IUnknown *pUnkOuter, REFIID riid, _COM_Outptr_ void **ppvObject);
+	HRESULT STDMETHODCALLTYPE CreateInstance(IUnknown *pUnkOuter, REFIID riid, void **ppvObject);
 	HRESULT STDMETHODCALLTYPE LockServer(BOOL fLock);
 
 private:

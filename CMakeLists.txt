@@ -1,5 +1,5 @@
 set(CMAKE_LEGACY_CYGWIN_WIN32 0)
-cmake_minimum_required(VERSION 2.8.0 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
 project(spellers CXX C)
 
 # Release or Debug
@@ -51,6 +51,11 @@ else()
 endif()
 
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include")
+
+include(FindPkgConfig)
+pkg_check_modules(HFSTOSPELL REQUIRED hfstospell)
+link_directories(${HFSTOSPELL_LIBRARY_DIRS})
+include_directories(${HFSTOSPELL_INCLUDE_DIRS})
 
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/msoffice")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/mozilla/native")

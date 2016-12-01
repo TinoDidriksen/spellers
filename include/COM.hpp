@@ -27,6 +27,7 @@
 #include <cstdint>
 #include <cstdlib>
 #include <guiddef.h>
+#include <objbase.h>
 
 template <typename T>
 inline T identity(T);

@@ -24,12 +24,12 @@
 #include <vector>
 #include <string>
 #include <algorithm>
-#include <ObjIdl.h>
+#include <objidl.h>
 #include "DLL.hpp"
 #include <debugp.hpp>
 
 template<typename String>
-inline void CoCopyWString(const String& in, _COM_Outptr_ PWSTR* out) {
+inline void CoCopyWString(const String& in, PWSTR* out) {
 	debugp p(__FUNCTION__);
 	p(in, static_cast<void*>(*out));
 	*out = reinterpret_cast<LPWSTR>(CoTaskMemAlloc(sizeof(wchar_t)*(in.size() + 1)));
@@ -74,7 +74,7 @@ public:
 		return refcount;
 	}
 
-	IFACEMETHODIMP QueryInterface(REFIID riid, _COM_Outptr_ void **ppvObject) {
+	IFACEMETHODIMP QueryInterface(REFIID riid, void **ppvObject) {
 		//debugp p(__FUNCTION__);
 		if (ppvObject == nullptr) {
 			return E_POINTER;
@@ -92,7 +92,7 @@ public:
 		return hr;
 	}
 
-	IFACEMETHODIMP Next(ULONG celt, _COM_Outptr_ LPOLESTR *rgelt, _Out_ ULONG *pceltFetched) {
+	IFACEMETHODIMP Next(ULONG celt, LPOLESTR *rgelt, _Out_ ULONG *pceltFetched) {
 		debugp p(__FUNCTION__);
 		p(celt);
 		HRESULT hr = S_FALSE;
@@ -132,7 +132,7 @@ public:
 		return S_OK;
 	}
 
-	IFACEMETHODIMP Clone(_COM_Outptr_ IEnumString **ppenum) {
+	IFACEMETHODIMP Clone(IEnumString **ppenum) {
 		debugp p(__FUNCTION__);
 		EnumString* pnew = com_new<EnumString>(strings);
 		pnew->AddRef();
@@ -246,7 +246,7 @@ public:
 		return refcount;
 	}
 
-	IFACEMETHODIMP QueryInterface(REFIID riid, _COM_Outptr_ void **ppvObject) {
+	IFACEMETHODIMP QueryInterface(REFIID riid, void **ppvObject) {
 		//debugp p(__FUNCTION__);
 		if (ppvObject == nullptr) {
 			return E_POINTER;
@@ -264,7 +264,7 @@ public:
 		return hr;
 	}
 
-	IFACEMETHODIMP Next(_COM_Outptr_ ISpellingError **value) {
+	IFACEMETHODIMP Next(ISpellingError **value) {
 		debugp p(__FUNCTION__);
 		if (i >= errors.size()) {
 			return S_FALSE;

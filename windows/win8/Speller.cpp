@@ -59,7 +59,7 @@ Speller::Speller(std::wstring locale_)
 Speller::~Speller() {
 }
 
-HRESULT STDMETHODCALLTYPE Speller::QueryInterface(REFIID riid, _COM_Outptr_ void **ppvObject) {
+HRESULT STDMETHODCALLTYPE Speller::QueryInterface(REFIID riid, void **ppvObject) {
 	debugp p(__FUNCTION__);
 	p(UUID_to_String(riid));
 	if (ppvObject == nullptr) {
@@ -115,13 +115,13 @@ IFACEMETHODIMP Speller::get_LocalizedName(_Out_ PWSTR* value) {
 	return S_OK;
 }
 
-IFACEMETHODIMP Speller::get_OptionIds(_COM_Outptr_ IEnumString** value) {
+IFACEMETHODIMP Speller::get_OptionIds(IEnumString** value) {
 	debugp p(__FUNCTION__);
 	*value = com_new<EnumString>();
 	return S_OK;
 }
 
-IFACEMETHODIMP Speller::Check(_In_ PCWSTR text, _COM_Outptr_ IEnumSpellingError** value) {
+IFACEMETHODIMP Speller::Check(_In_ PCWSTR text, IEnumSpellingError** value) {
 	debugp p(__FUNCTION__);
 	if (text == nullptr) {
 		p("nullptr");
@@ -165,7 +165,7 @@ IFACEMETHODIMP Speller::Check(_In_ PCWSTR text, _COM_Outptr_ IEnumSpellingError*
 	return S_OK;
 }
 
-IFACEMETHODIMP Speller::Suggest(_In_ PCWSTR word, _COM_Outptr_ IEnumString** value) {
+IFACEMETHODIMP Speller::Suggest(_In_ PCWSTR word, IEnumString** value) {
 	debugp p(__FUNCTION__);
 	if (word == nullptr) {
 		return E_POINTER;
@@ -215,7 +215,7 @@ IFACEMETHODIMP Speller::InitializeWordlist(WORDLIST_TYPE wordlistType, _In_ IEnu
 	return hr;
 }
 
-IFACEMETHODIMP Speller::GetOptionDescription(_In_ PCWSTR optionId, _COM_Outptr_ IOptionDescription** value) {
+IFACEMETHODIMP Speller::GetOptionDescription(_In_ PCWSTR optionId, IOptionDescription** value) {
 	debugp p(__FUNCTION__);
 	(void)optionId;
 	*value = nullptr;

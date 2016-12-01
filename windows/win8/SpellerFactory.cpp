@@ -29,7 +29,7 @@ SpellerFactory::~SpellerFactory() {
 	}
 }
 
-HRESULT STDMETHODCALLTYPE SpellerFactory::QueryInterface(REFIID riid, _COM_Outptr_ void **ppvObject) {
+HRESULT STDMETHODCALLTYPE SpellerFactory::QueryInterface(REFIID riid, void **ppvObject) {
 	debugp p(__FUNCTION__);
 	p(UUID_to_String(riid));
 	if (ppvObject == nullptr) {
@@ -67,7 +67,7 @@ ULONG STDMETHODCALLTYPE SpellerFactory::Release() {
 	return refcount;
 }
 
-IFACEMETHODIMP SpellerFactory::get_SupportedLanguages(_COM_Outptr_ IEnumString** value) {
+IFACEMETHODIMP SpellerFactory::get_SupportedLanguages(IEnumString** value) {
 	debugp p(__FUNCTION__);
 	if (value == nullptr) {
 		return E_POINTER;
@@ -93,7 +93,7 @@ IFACEMETHODIMP SpellerFactory::IsSupported(_In_ PCWSTR languageTag, _Out_ BOOL* 
 	return S_OK;
 }
 
-IFACEMETHODIMP SpellerFactory::CreateSpellCheckProvider(_In_ PCWSTR languageTag, _COM_Outptr_ ISpellCheckProvider** value) {
+IFACEMETHODIMP SpellerFactory::CreateSpellCheckProvider(_In_ PCWSTR languageTag, ISpellCheckProvider** value) {
 	debugp p(__FUNCTION__);
 	if (value == nullptr) {
 		return E_POINTER;

@@ -2,7 +2,9 @@
 remove_definitions(-DWINVER=0x0501 -D_WIN32_WINNT=0x0501)
 add_definitions(-DWINVER=0x0602 -D_WIN32_WINNT=0x0602)
 
-add_definitions(-DDLL_EXPORTS)
+if(NOT MSVC)
+	include_directories("${CMAKE_SOURCE_DIR}/include/mingw")
+endif()
 
 add_library(speller-win8 SHARED
 	ClassFactory.cpp
@@ -18,10 +20,8 @@ add_library(speller-win8 SHARED
 	${CMAKE_SOURCE_DIR}/include/COM.hpp
 	${CMAKE_SOURCE_DIR}/include/debugp.hpp
 	${CMAKE_SOURCE_DIR}/include/shared.hpp
-
-	Speller.def
 	)
-target_link_libraries(speller-win8 hfstospell)
+target_link_libraries(speller-win8 ${HFSTOSPELL_LIBRARIES})
 
 add_executable(test-speller
 	test-speller.cpp
@@ -39,4 +39,4 @@ add_executable(test-speller
 	${CMAKE_SOURCE_DIR}/include/debugp.hpp
 	${CMAKE_SOURCE_DIR}/include/shared.hpp
 	)
-target_link_libraries(test-speller hfstospell)
+target_link_libraries(test-speller ${HFSTOSPELL_LIBRARIES})

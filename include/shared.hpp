@@ -69,7 +69,7 @@ inline bool read_conf(std::map<std::string,std::string>& conf) {
 #ifdef _WIN32
 	path.resize(MAX_PATH + 1);
 	MEMORY_BASIC_INFORMATION mbiInfo = { 0 };
-	if (VirtualQuery(read_conf, &mbiInfo, sizeof(mbiInfo))) {
+	if (VirtualQuery(reinterpret_cast<void*>(read_conf), &mbiInfo, sizeof(mbiInfo))) {
 		GetModuleFileNameA((HMODULE)(mbiInfo.AllocationBase), &path[0], MAX_PATH);
 	}
 #else

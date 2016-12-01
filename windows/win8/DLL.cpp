@@ -59,7 +59,7 @@ bool read_conf() {
 	return true;
 }
 
-STDAPI DllGetClassObject(REFCLSID objGuid, REFIID factoryGuid, void **factoryHandle) {
+STDAPI __declspec(dllexport) DllGetClassObject(REFCLSID objGuid, REFIID factoryGuid, void **factoryHandle) {
 	debugp p(__FUNCTION__);
 	p(UUID_to_String(objGuid));
 	HRESULT hr = CLASS_E_CLASSNOTAVAILABLE;
@@ -75,12 +75,12 @@ STDAPI DllGetClassObject(REFCLSID objGuid, REFIID factoryGuid, void **factoryHan
 	return hr;
 }
 
-STDAPI DllCanUnloadNow() {
+STDAPI __declspec(dllexport) DllCanUnloadNow() {
 	debugp p(__FUNCTION__);
 	return (refs || locks) ? S_FALSE : S_OK;
 }
 
-BOOL WINAPI DllMain(HINSTANCE instance, DWORD fdwReason, LPVOID lpvReserved) {
+BOOL WINAPI __declspec(dllexport) DllMain(HINSTANCE instance, DWORD fdwReason, LPVOID lpvReserved) {
 	debugp p(__FUNCTION__);
 	p(fdwReason);
 	(void)instance;

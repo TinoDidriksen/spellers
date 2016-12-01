@@ -25,11 +25,11 @@
 
 class ServiceFactory : public IClassFactory {
 public:
-	HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, _COM_Outptr_ void **ppvObject);
+	HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void **ppvObject);
 	ULONG STDMETHODCALLTYPE AddRef();
 	ULONG STDMETHODCALLTYPE Release();
 
-	HRESULT STDMETHODCALLTYPE CreateInstance(IUnknown *pUnkOuter, REFIID riid, _COM_Outptr_ void **ppvObject);
+	HRESULT STDMETHODCALLTYPE CreateInstance(IUnknown *pUnkOuter, REFIID riid, void **ppvObject);
 	HRESULT STDMETHODCALLTYPE LockServer(BOOL fLock);
 
 private:

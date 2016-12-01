@@ -31,7 +31,7 @@
 #ifdef _WIN32
 	#include <windows.h>
 
-	#ifdef DLL_EXPORTS
+	#ifdef SHIM_EXPORTS
 		#define SPELLER_API __declspec(dllexport)
 	#else
 		#define SPELLER_API __declspec(dllimport)
@@ -41,7 +41,7 @@
 	#include <unistd.h>
 	#include <popen_plus.h>
 
-	#ifdef DLL_EXPORTS
+	#ifdef SHIM_EXPORTS
 		#define SPELLER_API __attribute__ ((visibility ("default")))
 	#else
 		#define SPELLER_API
