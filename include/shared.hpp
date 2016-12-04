@@ -52,6 +52,10 @@
 
 #include <debugp.hpp>
 
+const size_t PROOF_VERSION_MAJOR = 1;
+const size_t PROOF_VERSION_MINOR = 0;
+const size_t PROOF_VERSION_PATCH = 0;
+
 inline std::string trim(std::string str) {
 	while (!str.empty() && (str.back() == 0 || std::isspace(str.back()))) {
 		str.pop_back();
