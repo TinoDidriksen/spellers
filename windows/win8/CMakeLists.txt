@@ -40,3 +40,8 @@ add_executable(test-speller
 	${CMAKE_SOURCE_DIR}/include/shared.hpp
 	)
 target_link_libraries(test-speller ${HFSTOSPELL_LIBRARIES})
+
+install(TARGETS speller-win8
+	ARCHIVE DESTINATION "${INST_LIBDIR}/${CMAKE_LIBRARY_ARCHITECTURE}"
+	LIBRARY DESTINATION "${INST_LIBDIR}/${CMAKE_LIBRARY_ARCHITECTURE}"
+	RUNTIME DESTINATION bin)
