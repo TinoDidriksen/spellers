@@ -95,7 +95,7 @@ inline bool read_conf(std::map<std::string,std::string>& conf) {
 	std::string line;
 	std::ifstream inif(path + "speller.ini", std::ios::binary);
 	// Search upwards for speller.ini
-	while (inif.bad() && !path.empty()) {
+	while (!inif && !path.empty()) {
 		path.pop_back();
 		while (!path.empty() && path.back() != '/' && path.back() != '\\') {
 			path.pop_back();
