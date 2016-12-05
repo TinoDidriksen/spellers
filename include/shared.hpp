@@ -99,7 +99,7 @@ inline bool read_conf(std::map<std::string,std::string>& conf) {
 		while (!path.empty() && path.back() != '/' && path.back() != '\\') {
 			path.pop_back();
 		}
-		init.clear();
+		inif.clear();
 		inif.open(path + "speller.ini", std::ios::binary);
 	}
 
