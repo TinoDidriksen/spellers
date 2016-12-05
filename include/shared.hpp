@@ -32,6 +32,7 @@
 	#pragma warning (disable: 4459)
 #endif
 
+#include <stdexcept>
 #include <fstream>
 #include <string>
 #include <map>
@@ -83,7 +84,7 @@ inline bool read_conf(std::map<std::string,std::string>& conf) {
 #endif
 	if (path[0] == 0) {
 		p("path was empty");
-		return false;
+		throw std::runtime_error(std::string("Path was empty: ") + path);
 	}
 	while (!path.empty() && path.back() != '/' && path.back() != '\\') {
 		path.pop_back();
@@ -119,7 +120,7 @@ inline bool read_conf(std::map<std::string,std::string>& conf) {
 
 	if (conf.empty() || !conf.count("ENGINE")) {
 		p("conf was empty");
-		return false;
+		throw std::runtime_error(std::string("Conf was empty: ") + path);
 	}
 
 	return true;

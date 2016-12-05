@@ -45,7 +45,7 @@ bool read_conf() {
 	debugp p(__FUNCTION__);
 
 	if (!read_conf(conf)) {
-		return false;
+		throw std::runtime_error("Failed reading configuration");
 	}
 
 	IID_Guid = String_to_UUID(conf["UUID"]);

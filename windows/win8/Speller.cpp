@@ -44,15 +44,15 @@ Speller::Speller(std::wstring locale_)
 	}
 	catch (hfst_ol::ZHfstMetaDataParsingError ex) {
 		p("ZHfstMetaDataParsingError:", ex.what());
-		throw -1;
+		throw;
 	}
 	catch (hfst_ol::ZHfstZipReadingError ex) {
 		p("ZHfstZipReadingError:", ex.what());
-		throw -1;
+		throw;
 	}
 	catch (hfst_ol::ZHfstXmlParsingError ex) {
 		p("ZHfstXmlParsingError:", ex.what());
-		throw -1;
+		throw;
 	}
 }
 

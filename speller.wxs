@@ -58,6 +58,23 @@
 {LOCALE_REGS}
           </Component>
 
+          <Component Id='SpellerWindows8' Guid='{UUID4}'>
+            <RegistryKey Id='SpellerRegWin8' Root='HKLM' Key='Software\\Microsoft\\Spelling\\Spellers\\{NAME}' ForceDeleteOnUninstall='yes'>
+              <RegistryValue Type='string' Name='CLSID' Value='{{UUID0}}' />
+            </RegistryKey>
+            <RegistryKey Id='SpellerRegWin8CLSID' Root='HKLM' Key='Software\\Classes\\CLSID\\{{UUID0}}' ForceDeleteOnUninstall='yes'>
+              <RegistryValue Type='string' Value='{NAME}' />
+              <RegistryValue Type='string' Name='AppId' Value='{{UUID0}}' />
+            </RegistryKey>
+            <RegistryKey Id='SpellerRegWin8Inproc' Root='HKLM' Key='Software\\Classes\\CLSID\\{{UUID0}}\\InprocServer32' ForceDeleteOnUninstall='yes'>
+              <RegistryValue Type='string' Value='[BACKENDDIR]libspeller-win8.dll' />
+              <RegistryValue Type='string' Name='ThreadingModel' Value='Both' />
+            </RegistryKey>
+            <RegistryKey Id='SpellerRegWin8Version' Root='HKLM' Key='Software\\Classes\\CLSID\\{{UUID0}}\\Version' ForceDeleteOnUninstall='yes'>
+              <RegistryValue Type='string' Value='{VERSION_DOT}' />
+            </RegistryKey>
+          </Component>
+
         </Directory>
       </Directory>
     </Directory>
@@ -66,6 +83,7 @@
       <ComponentRef Id='SpellChecker' />
       <ComponentRef Id='Backend' />
       <ComponentRef Id='SpellerReg' />
+      <ComponentRef Id='SpellerWindows8' />
     </Feature>
 
   </Product>
