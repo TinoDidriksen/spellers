@@ -30,7 +30,7 @@
 #include <debugp.hpp>
 
 #ifndef NDEBUG
-std::ofstream debug("C:/Temp/Tino/debug-speller-win8.txt");
+std::ofstream debug("C:/Temp/Tino/debug-speller-win8.txt", std::ios_base::app);
 thread_local size_t debugd = 0;
 #endif
 
@@ -41,7 +41,7 @@ std::unique_ptr<ClassFactory> factory;
 size_t refs = 0;
 size_t locks = 0;
 
-bool read_conf() {
+void read_conf() {
 	debugp p(__FUNCTION__);
 
 	if (!read_conf(conf)) {
@@ -53,10 +53,9 @@ bool read_conf() {
 	std::istringstream ss(conf["LOCALES"]);
 	std::string locale;
 	while (std::getline(ss, locale, ' ')) {
+		p(locale);
 		locales.emplace_back(locale.begin(), locale.end());
 	}
-
-	return true;
 }
 
 STDAPI __declspec(dllexport) DllGetClassObject(REFCLSID objGuid, REFIID factoryGuid, void **factoryHandle) {
@@ -82,7 +81,7 @@ STDAPI __declspec(dllexport) DllCanUnloadNow() {
 
 BOOL WINAPI __declspec(dllexport) DllMain(HINSTANCE instance, DWORD fdwReason, LPVOID lpvReserved) {
 	debugp p(__FUNCTION__);
-	p(fdwReason);
+	p(fdwReason, reinterpret_cast<uintptr_t>(lpvReserved));
 	(void)instance;
 	(void)lpvReserved;
 
@@ -97,5 +96,5 @@ BOOL WINAPI __declspec(dllexport) DllMain(HINSTANCE instance, DWORD fdwReason, L
 	}
 	}
 
-	return 1;
+	return TRUE;
 }

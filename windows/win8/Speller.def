@@ -1,5 +1,6 @@
-LIBRARY
+LIBRARY libspeller-win8.dll
 
 EXPORTS
-    DllCanUnloadNow     PRIVATE
-    DllGetClassObject   PRIVATE
+    DllCanUnloadNow = DllCanUnloadNow@0      @1
+    DllGetClassObject = DllGetClassObject@12 @2
+    DllMain = DllMain@12                     @3

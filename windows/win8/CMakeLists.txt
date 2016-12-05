@@ -20,6 +20,7 @@ add_library(speller-win8 SHARED
 	${CMAKE_SOURCE_DIR}/include/COM.hpp
 	${CMAKE_SOURCE_DIR}/include/debugp.hpp
 	${CMAKE_SOURCE_DIR}/include/shared.hpp
+	Speller.def
 	)
 target_link_libraries(speller-win8 ${HFSTOSPELL_LIBRARIES})
 
