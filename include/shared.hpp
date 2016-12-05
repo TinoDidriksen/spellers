@@ -78,7 +78,7 @@ inline bool read_conf(std::map<std::string,std::string>& conf) {
 	}
 #else
 	Dl_info dl_info = {};
-	dladdr((void*)read_conf, &dl_info);
+	dladdr(reinterpret_cast<void*>(read_conf), &dl_info);
 	path.assign(dl_info.dli_fname);
 #endif
 	if (path[0] == 0) {
@@ -89,8 +89,20 @@ inline bool read_conf(std::map<std::string,std::string>& conf) {
 		path.pop_back();
 	}
 
+	conf["PATH"] = path;
+
 	std::string line;
 	std::ifstream inif(path + "speller.ini", std::ios::binary);
+	// Search upwards for speller.ini
+	while (inif.bad() && !path.empty()) {
+		path.pop_back();
+		while (!path.empty() && path.back() != '/' && path.back() != '\\') {
+			path.pop_back();
+		}
+		init.clear();
+		inif.open(path + "speller.ini", std::ios::binary);
+	}
+
 	while (std::getline(inif, line)) {
 		line = trim(line);
 		if (line.empty() || line[0] == '#') {
@@ -109,13 +121,6 @@ inline bool read_conf(std::map<std::string,std::string>& conf) {
 		p("conf was empty");
 		return false;
 	}
-
-	conf["PATH"] = path;
-	conf["SERVICE_NAME"] = conf["NAME"] + " Speller Service";
-
-	// Create a pipe name from the locale prefix
-	conf["PIPE"] = "\\\\.\\pipe\\speller_";
-	conf["PIPE"] += conf["LOCALES"].substr(0, conf["LOCALES"].find('-'));
 
 	return true;
 }
