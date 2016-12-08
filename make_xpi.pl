@@ -93,12 +93,10 @@ for (my $i=0 ; $i<9 ; $i++) {
    $conf{'UUID'.$i} =~ s/.$/$i/;
 }
 
-if (-s 'impls/'.$ARGV[0].'.sh') {
-   my $tmp = "/tmp/speller-$$";
-   print `./impls/$ARGV[0].sh '$tmp'`;
-   print `mv -v '$tmp/backend' '$dir/native/'`;
-   print `rm -rfv '$tmp'`;
-}
+my $tmp = "/tmp/speller-$$";
+print `./impls/backend.sh '$tmp' '$conf{SOURCE}'`;
+print `mv -v '$tmp/backend' '$dir/'`;
+print `rm -rfv '$tmp'`;
 
 fill_file('mozilla/'.$manifest, "$dir/$manifest", %conf);
 fill_file('mozilla/'.$rdf, "$dir/$rdf", %conf);
