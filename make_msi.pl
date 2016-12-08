@@ -17,8 +17,6 @@ if (! defined $ARGV[0]) {
    die "Must provide implementation name!\n";
 }
 
-my $bitwidth = $ENV{'BITWIDTH'} || 'i686';
-
 my $wxs = 'speller.wxs';
 my $ini = 'impls/'.$ARGV[0].'.ini';
 foreach my $f (($wxs, $ini)) {
@@ -47,6 +45,11 @@ while (<FILE>) {
 }
 close FILE;
 
+if ($ENV{WINX} eq 'win64') {
+   $conf{UUID} =~ s@...$@640@;
+   $conf{NAME} .= ' (x64)';
+}
+
 {
 	local $/ = undef;
 	open FILE, $wxs or die "Could not open $wxs: $!\n";
@@ -62,8 +65,8 @@ print `cp -av '$ini' '$dir/speller.ini'`;
 my $icon = '';
 if (-s 'impls/'.$ARGV[0].'.ico') {
    print `cp -av 'impls/$ARGV[0].ico' '$dir/'`;
-   $icon .= "    <Icon Id='{NAME}.ico' SourceFile='{NAME}.ico'/>\n";
-   $icon .= "    <Property Id='ARPPRODUCTICON' Value='{NAME}.ico'/>\n";
+   $icon .= "    <Icon Id='$ARGV[0].ico' SourceFile='$ARGV[0].ico'/>\n";
+   $icon .= "    <Property Id='ARPPRODUCTICON' Value='$ARGV[0].ico'/>\n";
 }
 $wxs =~ s/{ICON}\n?/$icon/g;
 
@@ -118,7 +121,7 @@ close FILE;
 chdir $dir;
 print `find . -type f -name '*.exe' -or -name '*.dll' | xargs -rn1 /opt/mxe/usr/bin/i686-w64-mingw32.shared-strip`;
 print `rm -fv *.msi`;
-if ($bitwidth eq 'x86_64') {
+if ($ENV{WINX} eq 'win64') {
    print `find . -type f -name '*.exe' -or -name '*.dll' | xargs -rn1 /opt/mxe/usr/bin/x86_64-w64-mingw32.shared-strip`;
    {
       local $/ = undef;
@@ -126,8 +129,8 @@ if ($bitwidth eq 'x86_64') {
       my $wsx = <FILE>;
       close FILE;
       $wsx =~ s@ProgramFilesFolder@ProgramFiles64Folder@g;
-      $wsx =~ s@<(Package [^>]+?)\s*/>@$1 Platform='x64' />@g;
-      $wsx =~ s@<(Component [^>]+?)\s*/>@$1 Win64='yes' />@g;
+      $wsx =~ s@(<Package [^>]+?)\s*/>@$1 Platform='x64' />@g;
+      $wsx =~ s@(<Component [^>]+?)\s*>@$1 Win64='yes'>@g;
       open FILE, ">$ARGV[0].wxs" or die "$!\n";
       print FILE $wsx;
       close FILE;
