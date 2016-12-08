@@ -17,6 +17,8 @@ if (! defined $ARGV[0]) {
    die "Must provide implementation name!\n";
 }
 
+my $bitwidth = $ENV{'BITWIDTH'} || 'i686';
+
 my $wxs = 'speller.wxs';
 my $ini = 'impls/'.$ARGV[0].'.ini';
 foreach my $f (($wxs, $ini)) {
@@ -75,12 +77,10 @@ for (my $i=0 ; $i<9 ; $i++) {
    $wxs =~ s/{UUID$i}/$conf{UUID}/g;
 }
 
-if (-s 'impls/'.$ARGV[0].'.sh') {
-   my $tmp = "/tmp/speller-$$";
-   print `./impls/$ARGV[0].sh '$tmp'`;
-   print `mv -v '$tmp/backend' '$dir/'`;
-   print `rm -rfv '$tmp'`;
-}
+my $tmp = "/tmp/speller-$$";
+print `./impls/backend.sh '$tmp' '$conf{SOURCE}'`;
+print `mv -v '$tmp/backend' '$dir/'`;
+print `rm -rfv '$tmp'`;
 
 my $backend = '';
 foreach my $f (glob("$dir/backend/*")) {
@@ -118,6 +118,26 @@ close FILE;
 chdir $dir;
 print `find . -type f -name '*.exe' -or -name '*.dll' | xargs -rn1 /opt/mxe/usr/bin/i686-w64-mingw32.shared-strip`;
 print `rm -fv *.msi`;
-print `wixl -v '$ARGV[0].wxs'`;
+if ($bitwidth eq 'x86_64') {
+   print `find . -type f -name '*.exe' -or -name '*.dll' | xargs -rn1 /opt/mxe/usr/bin/x86_64-w64-mingw32.shared-strip`;
+   {
+      local $/ = undef;
+      open FILE, "<$ARGV[0].wxs" or die "$!\n";
+      my $wsx = <FILE>;
+      close FILE;
+      $wsx =~ s@ProgramFilesFolder@ProgramFiles64Folder@g;
+      $wsx =~ s@<(Package [^>]+?)\s*/>@$1 Platform='x64' />@g;
+      $wsx =~ s@<(Component [^>]+?)\s*/>@$1 Win64='yes' />@g;
+      open FILE, ">$ARGV[0].wxs" or die "$!\n";
+      print FILE $wsx;
+      close FILE;
+   }
+   print `wixl -a x64 -v '$ARGV[0].wxs'`;
+   $ver_dot .= '-64';
+}
+else {
+   print `wixl -v '$ARGV[0].wxs'`;
+   $ver_dot .= '-32';
+}
 print `osslsigncode -pkcs12 '/root/.keys/2015-11-23 TDC Code Signing.p12' -readpass '/root/.keys/2015-11-23 TDC Code Signing.key' -t http://timestamp.verisign.com/scripts/timstamp.dll -in '$ARGV[0].msi' -out '$ARGV[0]-$ver_dot.msi'`;
 print `rm -fv '$ARGV[0].msi'`;
