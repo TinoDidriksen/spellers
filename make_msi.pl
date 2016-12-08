@@ -133,11 +133,9 @@ if ($bitwidth eq 'x86_64') {
       close FILE;
    }
    print `wixl -a x64 -v '$ARGV[0].wxs'`;
-   $ver_dot .= '-64';
 }
 else {
    print `wixl -v '$ARGV[0].wxs'`;
-   $ver_dot .= '-32';
 }
-print `osslsigncode -pkcs12 '/root/.keys/2015-11-23 TDC Code Signing.p12' -readpass '/root/.keys/2015-11-23 TDC Code Signing.key' -t http://timestamp.verisign.com/scripts/timstamp.dll -in '$ARGV[0].msi' -out '$ARGV[0]-$ver_dot.msi'`;
+print `osslsigncode -pkcs12 '/root/.keys/2015-11-23 TDC Code Signing.p12' -readpass '/root/.keys/2015-11-23 TDC Code Signing.key' -t http://timestamp.verisign.com/scripts/timstamp.dll -in '$ARGV[0].msi' -out '$ARGV[0]-$ver_dot-$ENV{WINX}.msi'`;
 print `rm -fv '$ARGV[0].msi'`;
