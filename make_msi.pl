@@ -17,6 +17,22 @@ if (! defined $ARGV[0]) {
    die "Must provide implementation name!\n";
 }
 
+sub file_get_contents {
+   my ($fn) = @_;
+	local $/ = undef;
+	open FILE, "<$fn" or die "Could not read $fn: $!\n";
+	my $data = <FILE>;
+   close FILE;
+   return $data;
+}
+
+sub file_put_contents {
+   my ($fn,$data) = @_;
+	open FILE, ">$fn" or die "Could not write $fn: $!\n";
+   print FILE $data;
+   close FILE;
+}
+
 my $wxs = 'speller.wxs';
 my $ini = 'impls/'.$ARGV[0].'.ini';
 foreach my $f (($wxs, $ini)) {
@@ -46,21 +62,27 @@ while (<FILE>) {
 close FILE;
 
 if ($ENV{WINX} eq 'win64') {
+   $conf{UUID_ORG} = $conf{UUID};
    $conf{UUID} =~ s@...$@640@;
    $conf{NAME} .= ' (x64)';
 }
 
-{
-	local $/ = undef;
-	open FILE, $wxs or die "Could not open $wxs: $!\n";
-	$wxs = <FILE>;
-   close FILE;
-}
+$wxs = file_get_contents($wxs);
 
 my $dir = 'build/'.$ARGV[0];
 print `rm -rfv '$dir'`;
 print `mkdir -pv '$dir'`;
 print `cp -av '$ini' '$dir/speller.ini'`;
+{
+	local $/ = undef;
+   open FILE, "<$dir/speller.ini" or die "$!\n";
+   my $ini = <FILE>;
+   close FILE;
+   $ini =~ s@$conf{UUID_ORG}@$conf{UUID}@g;
+   open FILE, ">$dir/speller.ini" or die "$!\n";
+   print FILE $ini;
+   close FILE;
+}
 
 my $icon = '';
 if (-s 'impls/'.$ARGV[0].'.ico') {
