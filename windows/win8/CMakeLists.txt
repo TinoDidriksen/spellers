@@ -1,3 +1,7 @@
+# This part is only for Windows 8 and newer
+remove_definitions(-DWINVER=0x0501 -D_WIN32_WINNT=0x0501)
+add_definitions(-DWINVER=0x0602 -D_WIN32_WINNT=0x0602)
+
 if(NOT MSVC)
 	include_directories("${CMAKE_SOURCE_DIR}/include/mingw")
 endif()
@@ -37,6 +41,10 @@ add_executable(test-speller
 	${CMAKE_SOURCE_DIR}/include/shared.hpp
 	)
 target_link_libraries(test-speller ${HFSTOSPELL_LIBRARIES})
+
+add_executable(resolve-locale
+	resolve-locale.cpp
+	)
 
 install(TARGETS speller-win8
 	ARCHIVE DESTINATION "${INST_LIBDIR}/${CMAKE_LIBRARY_ARCHITECTURE}"
