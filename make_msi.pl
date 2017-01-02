@@ -61,8 +61,8 @@ while (<FILE>) {
 }
 close FILE;
 
+$conf{UUID_ORG} = $conf{UUID};
 if ($ENV{WINX} eq 'win64') {
-   $conf{UUID_ORG} = $conf{UUID};
    $conf{UUID} =~ s@...$@640@;
    $conf{NAME} .= ' (x64)';
 }
