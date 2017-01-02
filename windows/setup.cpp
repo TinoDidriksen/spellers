@@ -61,7 +61,7 @@ int main() {
 	GetTempPathA(MAX_PATH, path);
 	char fname[MAX_PATH]{};
 
-	std::cout << "Installing " << SPELLER_NAME << std::endl;
+	std::cout << "Installing speller package..." << std::endl;
 
 	SYSTEM_INFO si;
 	GetNativeSystemInfo(&si);
