@@ -6,6 +6,7 @@ use strict;
 use warnings;
 use utf8;
 use File::Basename;
+use File::stat;
 BEGIN {
 	$| = 1;
 	binmode(STDIN, ':encoding(UTF-8)');
@@ -41,13 +42,6 @@ foreach my $f (($wxs, $ini)) {
    }
 }
 
-# Yields versions such as 86.114.29319 for timestamp 1450340999
-my $t = time();
-my ($ma,$mi,$pa) = ( (($t >> 24) & 0xFF), (($t >> 16) & 0xFF), ($t & 0xFFFF) );
-my $ver_dot = sprintf('%u.%u.%u', $ma, $mi, $pa);
-my $ver_comma = $ver_dot;
-$ver_comma =~ s/\./,/g;
-
 my %conf;
 open FILE, $ini or die "Could not open $ini: $!\n";
 while (<FILE>) {
@@ -61,6 +55,23 @@ while (<FILE>) {
 }
 close FILE;
 
+my $dir = 'build/'.$ARGV[0];
+print `rm -rfv '$dir'`;
+print `mkdir -pv '$dir'`;
+
+my $tmp = "/tmp/speller-$$";
+print `./impls/backend.sh '$tmp' '$conf{SOURCE}'`;
+print `mv -v '$tmp/backend' '$dir/'`;
+print `rm -rfv '$tmp'`;
+
+# Yields versions such as 86.114.29319 for timestamp 1450340999
+my @zhfst = glob("$dir/backend/*.zhfst");
+my $t = stat($zhfst[0])->mtime;
+my ($ma,$mi,$pa) = ( (($t >> 24) & 0xFF), (($t >> 16) & 0xFF), ($t & 0xFFFF) );
+my $ver_dot = sprintf('%u.%u.%u', $ma, $mi, $pa);
+my $ver_comma = $ver_dot;
+$ver_comma =~ s/\./,/g;
+
 $conf{UUID_ORG} = $conf{UUID};
 if ($ENV{WINX} eq 'win64') {
    $conf{UUID} =~ s@...$@640@;
@@ -69,9 +80,6 @@ if ($ENV{WINX} eq 'win64') {
 
 $wxs = file_get_contents($wxs);
 
-my $dir = 'build/'.$ARGV[0];
-print `rm -rfv '$dir'`;
-print `mkdir -pv '$dir'`;
 print `cp -av '$ini' '$dir/speller.ini'`;
 {
 	local $/ = undef;
@@ -101,11 +109,6 @@ for (my $i=0 ; $i<9 ; $i++) {
    $conf{UUID} =~ s/.$/$i/;
    $wxs =~ s/{UUID$i}/$conf{UUID}/g;
 }
-
-my $tmp = "/tmp/speller-$$";
-print `./impls/backend.sh '$tmp' '$conf{SOURCE}'`;
-print `mv -v '$tmp/backend' '$dir/'`;
-print `rm -rfv '$tmp'`;
 
 my $backend = '';
 foreach my $f (glob("$dir/backend/*")) {

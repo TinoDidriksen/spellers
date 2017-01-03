@@ -6,6 +6,7 @@ use strict;
 use warnings;
 use utf8;
 use File::Basename;
+use File::stat;
 BEGIN {
 	$| = 1;
 	binmode(STDIN, ':encoding(UTF-8)');
@@ -66,18 +67,24 @@ $conf{'LOCALES_JSON'} = "['".join("', '", @locales)."']";
 $conf{'LOCALE_LC'} = lc($locales[0]);
 $conf{'LOCALE_LC'} =~ s/[^a-z0-9]/_/g;
 
-# Yields versions such as 86.114.29319 for timestamp 1450340999
-my $t = time();
-my ($ma,$mi,$pa) = ( (($t >> 24) & 0xFF), (($t >> 16) & 0xFF), ($t & 0xFFFF) );
-$conf{'VERSION_DOT'} = sprintf('%u.%u.%u', $ma, $mi, $pa);
-$conf{'VERSION_COMMA'} = $conf{'VERSION_DOT'};
-$conf{'VERSION_COMMA'} =~ s/\./,/g;
-
 my $dir = 'build/mozilla/'.$ARGV[0];
 print `rm -rfv '$dir'`;
 print `mkdir -pv '$dir/components' '$dir/native'`;
 print `cp -av '$ini' '$dir/native/speller.ini'`;
 print `cp -av mozilla/native/*.dll '$dir/native/'`;
+
+my $tmp = "/tmp/speller-$$";
+print `./impls/backend.sh '$tmp' '$conf{SOURCE}'`;
+print `mv -v '$tmp/backend' '$dir/'`;
+print `rm -rfv '$tmp'`;
+
+# Yields versions such as 86.114.29319 for timestamp 1450340999
+my @zhfst = glob("$dir/backend/*.zhfst");
+my $t = stat($zhfst[0])->mtime;
+my ($ma,$mi,$pa) = ( (($t >> 24) & 0xFF), (($t >> 16) & 0xFF), ($t & 0xFFFF) );
+$conf{'VERSION_DOT'} = sprintf('%u.%u.%u', $ma, $mi, $pa);
+$conf{'VERSION_COMMA'} = $conf{'VERSION_DOT'};
+$conf{'VERSION_COMMA'} =~ s/\./,/g;
 
 $conf{'SKIN'} = '';
 $conf{'ICON'} = '';
@@ -92,11 +99,6 @@ for (my $i=0 ; $i<9 ; $i++) {
    $conf{'UUID'.$i} = $conf{'UUID'};
    $conf{'UUID'.$i} =~ s/.$/$i/;
 }
-
-my $tmp = "/tmp/speller-$$";
-print `./impls/backend.sh '$tmp' '$conf{SOURCE}'`;
-print `mv -v '$tmp/backend' '$dir/'`;
-print `rm -rfv '$tmp'`;
 
 fill_file('mozilla/'.$manifest, "$dir/$manifest", %conf);
 fill_file('mozilla/'.$rdf, "$dir/$rdf", %conf);
