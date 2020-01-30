@@ -42,15 +42,15 @@ Speller::Speller(std::wstring locale_)
 		speller.read_zhfst(engine);
 		speller.set_time_cutoff(6.0);
 	}
-	catch (hfst_ol::ZHfstMetaDataParsingError ex) {
+	catch (hfst_ospell::ZHfstMetaDataParsingError ex) {
 		p("ZHfstMetaDataParsingError:", ex.what());
 		throw;
 	}
-	catch (hfst_ol::ZHfstZipReadingError ex) {
+	catch (hfst_ospell::ZHfstZipReadingError ex) {
 		p("ZHfstZipReadingError:", ex.what());
 		throw;
 	}
-	catch (hfst_ol::ZHfstXmlParsingError ex) {
+	catch (hfst_ospell::ZHfstXmlParsingError ex) {
 		p("ZHfstXmlParsingError:", ex.what());
 		throw;
 	}
@@ -247,7 +247,7 @@ bool Speller::checkValidWord(const std::wstring& word, size_t suggs) {
 	std::vector<std::wstring>& alts = invalid_words[word];
 	alts.clear();
 
-	hfst_ol::CorrectionQueue corrections = speller.suggest(cbuffer);
+	hfst_ospell::CorrectionQueue corrections = speller.suggest(cbuffer);
 
 	if (corrections.size() == 0) {
 		return false;

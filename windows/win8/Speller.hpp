@@ -54,7 +54,7 @@ public:
 private:
 	bool checkValidWord(const std::wstring& word, size_t suggs = 0);
 
-	hfst_ol::ZHfstOspeller speller;
+	hfst_ospell::ZHfstOspeller speller;
 
 	ULONG refcount = 1;
 	std::wstring locale;
